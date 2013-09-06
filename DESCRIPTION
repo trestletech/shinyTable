@@ -19,3 +19,4 @@ Collate:
     'htable-output.R'
     'init.R'
     'render-htable.R'
+    'getHtableTypes.R'
