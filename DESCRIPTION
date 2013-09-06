@@ -1,0 +1,21 @@
+Package: shinyTable
+Type: Package
+Title: Handsontable for Shiny
+Version: 0.1.0
+Date: 2013-09-05
+Author: Trestle Technology, LLC.
+Maintainer: Jeff Allen <jeff@trestletech.com>
+Description: Handsontable wrappers for Shiny that make reading and writing
+    tabular data easy from Shiny.
+License: MIT
+Depends:
+    R (>= 2.15.0)
+Imports:
+    shiny (>= 0.6.0)
+Suggests:
+    testthat
+BugReports: https://github.com/trestletech/shinyTable/issues
+Collate:
+    'htable-output.R'
+    'init.R'
+    'render-htable.R'
