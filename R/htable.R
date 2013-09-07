@@ -4,7 +4,7 @@
 #' @param outputId The ID of the \code{glOutput} associated with this element
 #' @author Jeff Allen \email{jeff@@trestletech.com}
 #' @export
-htableOutput <- function(outputId){
+htable <- function(outputId){
   tagList(
     singleton(tags$head(
       initResourcePaths(),
@@ -14,6 +14,6 @@ htableOutput <- function(outputId){
                 type = 'text/css',
                 href = 'shinyTable/jquery.handsontable.full.css')
     )),
-    div(id=outputId, class="shiny-htable-output") 
+    div(id=outputId, class="shiny-htable") 
   )
 }

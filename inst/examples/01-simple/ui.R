@@ -15,6 +15,6 @@ shinyUI(pageWithSidebar(
   
   # Show the simple table
   mainPanel(
-    htableOutput("tbl")
+    htable("tbl")
   )
 ))

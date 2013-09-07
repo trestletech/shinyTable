@@ -1,3 +1,4 @@
-export(htableOutput)
+export(applyTableChanges)
+export(htable)
 export(renderHtable)
 importFrom(shiny,exprToFunction)

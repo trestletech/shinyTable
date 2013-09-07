@@ -16,7 +16,8 @@ Suggests:
     testthat
 BugReports: https://github.com/trestletech/shinyTable/issues
 Collate:
-    'htable-output.R'
     'init.R'
     'render-htable.R'
-    'getHtableTypes.R'
+    'htable.R'
+    'get-htable-types.R'
+    'apply-table-changes.R'
