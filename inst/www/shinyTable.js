@@ -9,6 +9,8 @@ $.extend(shinyTableOutputBinding, {
       return;
     }
     
+    Shiny.onInputChange('.clientdata_output_' + el.id + '_init', true, false);
+    
     //TODO: Is there some jQuery builtin for this?
     cols = [];
     for (var i = 0; i < htable.colnames.length; i++){
@@ -89,7 +91,7 @@ $.extend(shinyTableInputBinding, {
     }
     
     registerCallback(tbl, el, "afterChange", function(changes, source){
-      if (source !== "loadData"){
+      if (source !== "loadData" && source !== "server-update"){
         // Not a re-init from the server.
         Shiny.onInputChange('.clientdata_output_' + el.id + '_changes', changes);
         
@@ -105,4 +107,23 @@ $.extend(shinyTableInputBinding, {
 });
 
 Shiny.inputBindings.register(shinyTableInputBinding);
+
+Shiny.addCustomMessageHandler('htable-change', function(data) {
+  var $el = $('#' + data.id);
+  if (!$el || !data.changes)
+    return;
+
+  var tbl = $el.handsontable('getInstance');
+  for( var i = 0; i < data.changes.length; i++){
+    var change = data.changes[i];
+    console.log("Change = ");
+    console.log(change);
+    tbl.setDataAtCell(
+      parseInt(change.row), 
+      parseInt(change.col),
+      change.new,
+      "server-update");
+  };
+});
+
 })();

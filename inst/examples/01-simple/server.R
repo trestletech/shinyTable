@@ -12,8 +12,10 @@ shinyServer(function(input, output, session) {
     } else{
       # Updates from client. The server has been made aware and can do some
       # validation or updates here, then send back the revised table. In this
-      # case, we'll just pass it back through.
-      input$tbl
+      # case, we'll filter any number >= 100 in the first column.
+      tbl <- input$tbl
+      tbl[as.integer(tbl[,1]) >= 100,1] <- 99
+      tbl
     }
   })
   

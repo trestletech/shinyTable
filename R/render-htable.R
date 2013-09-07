@@ -12,6 +12,9 @@
 #' @export
 renderHtable <- function(expr, env = parent.frame(), 
                         quoted = FALSE){
+  
+  oldTbl <- list();
+  
   func <- exprToFunction(expr, env, quoted)
   function(shinysession, name, ...) {
     data <- func()
@@ -21,13 +24,14 @@ renderHtable <- function(expr, env = parent.frame(),
     
     # Only want to add this observer once -- so we'll only add it if the input
     # doesn't yet exist, indicating that this is the first time it was run.
-    #print(.initializedElements)
-    if (is.null(.initializedElements[[name]])) {
-      .initializedElements[[name]] <- TRUE
+    if (is.null(.initializedElements[[shinysession$token]][[name]])) {
+      .initializedElements[[shinysession$token]][[name]] <- TRUE
       
       # Setup reactive listeners around client data
       observe({
         isolate(tbl <- shinysession$.input$get(name))
+        
+        oldTbl[[shinysession$token]][[name]] <<- tbl
         
         changes <- shinysession$clientData[[paste("output_",name,"_changes", sep="")]]  
         
@@ -38,16 +42,42 @@ renderHtable <- function(expr, env = parent.frame(),
       }, priority=9999)
     }
     
-    
-    #TODO: surely a faster way to convert data.frame to array of arrays...
-    arrayData <- t(apply(data, 1, as.character))
-    cnames <- colnames(data)
-    types <- getHtableTypes(data)
-    
-    return(list(
-      data = arrayData,
-      colnames = cnames,
-      types = types
-    ))
+    if (is.null(shinysession$clientData[[paste("output_",name,"_init", sep="")]])){
+      # Must be initializing, send whole table.
+      
+      #TODO: surely a faster way to convert data.frame to array of arrays...
+      arrayData <- t(apply(data, 1, as.character))
+      cnames <- colnames(data)
+      types <- getHtableTypes(data)
+      
+      return(list(
+        data = arrayData,
+        colnames = cnames,
+        types = types
+      ))  
+    } else{
+      # input stores the state captured currently on the client. Just send the 
+      # delta
+      if (is.null(oldTbl[[shinysession$token]][[name]]) || is.null(data)){
+        print("Null")
+        return(NULL)
+      }
+      
+      delta <- calcHtableDelta(oldTbl[[shinysession$token]][[name]], data)
+      
+      # Avoid the awkward serialization of a row-less matrix in RJSONIO
+      if (nrow(delta) == 0){
+        delta <- NULL
+      }
+      
+      #TODO: support updating of types, colnames, rownames, etc.
+      
+      shinysession$session$sendCustomMessage("htable-change", 
+                                             list(id=name, 
+                                                  changes=delta))
+      
+      # Don't return any data, changes have already been sent.
+      return(NULL)
+    }
   }
 }

@@ -21,3 +21,4 @@ Collate:
     'htable.R'
     'get-htable-types.R'
     'apply-table-changes.R'
+    'calc-htable-delta.R'
