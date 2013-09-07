@@ -5,6 +5,6 @@ library(shinyTable)
 #' @author Jeff Allen \email{jeff@@trestletech.com}
 shinyServer(function(input, output) {
   output$tbl <- renderHtable({
-    data.frame(list(a=1:2, b=3:4, c=c("hi", "test")))
+    data.frame(list(num1=1:input$slider, num2=(1:input$slider)+5, letter=LETTERS[1:(input$slider)]))
   })
 })

@@ -16,13 +16,22 @@ $.extend(shinyTableOutputBinding, {
       });
     }
     
-    $(el).handsontable({
+    var settings = {
       readOnly: true,
       data: htable.data,
       colHeaders: htable.colnames,
       columnSorting: false,
       columns: cols
-    });
+    };
+    
+    var tbl = $(el).handsontable('getInstance');
+    if (tbl){
+      //already exists, just update
+      tbl.updateSettings(settings)
+    } else{
+      //new table, create from scratch.
+      $(el).handsontable(settings);
+    }
   }
 });
 Shiny.outputBindings.register(shinyTableOutputBinding, 'shinyTable.tableBinding');
