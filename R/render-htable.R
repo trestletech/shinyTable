@@ -19,6 +19,13 @@ renderHtable <- function(expr, env = parent.frame(),
   function(shinysession, name, ...) {
     data <- func()
     
+    # Identify columns that are factors
+    factorInd <- sapply(data, class) == "factor"
+    if (any(factorInd)){
+      warning ("Factors aren't currently supported. Will convert using as.character().")
+      data[,factorInd] <- as.character(data[,factorInd])
+    }
+    
     # Store the server-side data.frame in input
     shinysession$.input$set(name, data)
     
