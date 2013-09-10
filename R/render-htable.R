@@ -1,4 +1,5 @@
 .initializedElements <- new.env()
+.oldTables <- new.env()
 
 #' Render a Handsontable Element
 #' 
@@ -12,8 +13,6 @@
 #' @export
 renderHtable <- function(expr, env = parent.frame(), 
                         quoted = FALSE){
-  
-  oldTbl <- list();
   
   func <- exprToFunction(expr, env, quoted)
   function(shinysession, name, ...) {
@@ -36,9 +35,11 @@ renderHtable <- function(expr, env = parent.frame(),
       
       # Setup reactive listeners around client data
       observe({
+        print("Observe change")
+        
         isolate(tbl <- shinysession$.input$get(name))
         
-        oldTbl[[shinysession$token]][[name]] <<- tbl
+        .oldTables[[shinysession$token]][[name]] <- tbl
         
         changes <- shinysession$clientData[[paste("output_",name,"_changes", sep="")]]  
         
@@ -65,12 +66,26 @@ renderHtable <- function(expr, env = parent.frame(),
     } else{
       # input stores the state captured currently on the client. Just send the 
       # delta
-      if (is.null(oldTbl[[shinysession$token]][[name]]) || is.null(data)){
-        print("Null")
+      if (is.null(.oldTables[[shinysession$token]][[name]])){
+        print("Null oldTbl")
         return(NULL)
       }
       
-      delta <- calcHtableDelta(oldTbl[[shinysession$token]][[name]], data)
+      if (is.null(data)){
+        print("Null Data")
+        return(NULL)
+      }
+      
+      print ("Old")
+      print(.oldTables[[shinysession$token]][[name]])
+      
+      print("New")
+      print(data)
+      
+      delta <- calcHtableDelta(.oldTables[[shinysession$token]][[name]], data)
+      
+      print("Delta")
+      print(delta)
       
       # Avoid the awkward serialization of a row-less matrix in RJSONIO
       if (nrow(delta) == 0){
