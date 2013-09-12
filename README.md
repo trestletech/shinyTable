@@ -1,7 +1,20 @@
 shinyTable
 ==========
 
-An R package that integrates Shiny with Handsontable
+An R package that integrates Shiny with Handsontable. This package takes the 
+unique approach of intelligently calculating the data *that has changed* 
+on either the client or the server and sending only that data.
+
+The goal of the project is to provide full support for data.frames (including
+attributes and data types), seamlessly serializing and deserializing these
+data structures to/from the client for you. Of course, we intend to be
+compatible with matrices and other table-like structures in R.
+
+We'll expose as many Handsontable configuration options as is reasonably 
+possible including things like sortable, resizeable, and rearrangeable
+columns. We hope to fluidly incorporate data validation and other 
+advanced features, as well.
+
 
 Installation
 ------------
