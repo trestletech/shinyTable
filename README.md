@@ -20,12 +20,15 @@ Installation
 ------------
 
 You can install the latest version of the code using the `devtools` R package.
+This package uses a new proposed feature in Shiny which must be specifically
+installed, as well.
 
 ```
 # Install devtools, if you haven't already.
 install.packages("devtools")
 
 library(devtools)
+install_github("shiny", "trestletech")
 install_github("shinyTable", "trestletech")
 ```
 
