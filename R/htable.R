@@ -5,6 +5,20 @@
 #' @author Jeff Allen \email{jeff@@trestletech.com}
 #' @export
 htable <- function(outputId){
+  tryCatch({
+    # Try adding the input handler, it will stop if there's already a handler.
+    # Perhaps should consider adding an exists() function for input handlers.
+    addInputHandler("htable", function(val, shinysession, name){
+      changes <- val[[1]]
+      
+      oldTbl <- .oldTables[[shinysession$token]][[name]]
+      
+      tbl <- applyTableChanges(oldTbl, changes)
+      
+      tbl
+    })
+  }, error=function(e){})
+  
   tagList(
     singleton(tags$head(
       initResourcePaths(),

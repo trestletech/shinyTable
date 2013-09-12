@@ -1,4 +1,3 @@
-.initializedElements <- new.env()
 .oldTables <- new.env()
 
 #' Render a Handsontable Element
@@ -25,33 +24,10 @@ renderHtable <- function(expr, env = parent.frame(),
       data[,factorInd] <- as.character(data[,factorInd])
     }
     
-    # Store the server-side data.frame in input
-    shinysession$.input$set(name, data)
-    
-    # Only want to add this observer once -- so we'll only add it if the input
-    # doesn't yet exist, indicating that this is the first time it was run.
-    if (is.null(.initializedElements[[shinysession$token]][[name]])) {
-      .initializedElements[[shinysession$token]][[name]] <- TRUE
-      
-      # Setup reactive listeners around client data
-      observe({
-        print("Observe change")
-        
-        isolate(tbl <- shinysession$.input$get(name))
-        
-        .oldTables[[shinysession$token]][[name]] <- tbl
-        
-        changes <- shinysession$clientData[[paste("output_",name,"_changes", sep="")]]  
-        
-        tbl <- applyTableChanges(tbl, changes)
-        
-        shinysession$.input$set(name, tbl)
-        
-      }, priority=9999)
-    }
-    
     if (is.null(shinysession$clientData[[paste("output_",name,"_init", sep="")]])){
       # Must be initializing, send whole table.
+      
+      .oldTables[[shinysession$token]][[name]] <- data
       
       #TODO: surely a faster way to convert data.frame to array of arrays...
       arrayData <- t(apply(data, 1, as.character))
@@ -76,21 +52,14 @@ renderHtable <- function(expr, env = parent.frame(),
         return(NULL)
       }
       
-      print ("Old")
-      print(.oldTables[[shinysession$token]][[name]])
-      
-      print("New")
-      print(data)
-      
       delta <- calcHtableDelta(.oldTables[[shinysession$token]][[name]], data)
-      
-      print("Delta")
-      print(delta)
       
       # Avoid the awkward serialization of a row-less matrix in RJSONIO
       if (nrow(delta) == 0){
         delta <- NULL
       }
+      
+      .oldTables[[shinysession$token]][[name]] <- data
       
       #TODO: support updating of types, colnames, rownames, etc.
       

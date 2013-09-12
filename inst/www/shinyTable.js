@@ -39,7 +39,12 @@ $.extend(shinyTableOutputBinding, {
 });
 Shiny.outputBindings.register(shinyTableOutputBinding, 'shinyTable.tableBinding');
 
-
+/**
+ * Track the changes made to an htable. Due to the arrangement of callbacks, 
+ * we're not able to pass the changes into the function, so we need to store it
+ * externally. The changes will be stored here, indexed by the ID.
+ */
+var changeRegistry = {};
 
 /**
  * Track the event callbacks bound to each htable so that we have the option
@@ -74,9 +79,15 @@ $.extend(shinyTableInputBinding, {
   find: function(scope) {
     return $(scope).find(".shiny-htable");
   },
+  getType: function(){
+    return "htable";
+  },
   getValue: function(el) {
-    // Won't ever want to send the entire state of this table from the client.
-    // We'll just send changes, so return null.
+    if (changeRegistry[el.id]){
+      var changes = changeRegistry[el.id];
+      delete changeRegistry[el.id];
+      return changes;
+    }
     return null;
   },
   setValue: function(el, value) {
@@ -93,10 +104,13 @@ $.extend(shinyTableInputBinding, {
     registerCallback(tbl, el, "afterChange", function(changes, source){
       if (source !== "loadData" && source !== "server-update"){
         // Not a re-init from the server.
-        Shiny.onInputChange('.clientdata_output_' + el.id + '_changes', changes);
         
-        // Won't call callback, because we want to send changes ourselves rather
-        // than have Shiny send the entire state.
+        if (changes[el.id]){
+          console.log("WARNING: Overwriting a change before it was picked up by the server.");
+        }
+        changeRegistry[el.id] = changes;
+        
+        callback(false);
       }
     })
   },

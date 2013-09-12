@@ -18,7 +18,5 @@ shinyServer(function(input, output, session) {
       tbl[as.integer(tbl[,1]) >= 100,1] <- 99
       tbl
     }
-  })
-  
-  
+  })  
 })

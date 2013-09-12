@@ -11,7 +11,7 @@ License: MIT
 Depends:
     R (>= 2.15.0)
 Imports:
-    shiny (>= 0.6.0)
+    shiny (>= 0.7.0.99)
 Suggests:
     testthat
 BugReports: https://github.com/trestletech/shinyTable/issues
