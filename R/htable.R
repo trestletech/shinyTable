@@ -8,7 +8,7 @@ htable <- function(outputId){
   tryCatch({
     # Try adding the input handler, it will stop if there's already a handler.
     # Perhaps should consider adding an exists() function for input handlers.
-    addInputHandler("htable", function(val, shinysession, name){
+    addInputType("htable", function(val, shinysession, name){
       changes <- val[[1]]
       
       oldTbl <- .oldTables[[shinysession$token]][[name]]
