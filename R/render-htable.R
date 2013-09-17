@@ -18,10 +18,15 @@ renderHtable <- function(expr, env = parent.frame(),
     data <- func()
     
     # Identify columns that are factors
-    factorInd <- sapply(data, class) == "factor"
+    factorInd <- as.integer(which(sapply(data, class) == "factor"))
     if (any(factorInd)){
       warning ("Factors aren't currently supported. Will convert using as.character().")
-      data[,factorInd] <- as.character(data[,factorInd])
+      
+      # Doesn't work with multiple columns at once.
+      #TODO: Optimize
+      for (col in factorInd){
+        data[,col] <- as.character(data[,col])
+      }
     }
     
     if (is.null(shinysession$clientData[[paste("output_",name,"_init", sep="")]])){
