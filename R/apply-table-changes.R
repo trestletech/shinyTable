@@ -63,6 +63,9 @@ applyChange <- function(table, change, trim=TRUE){
 
 #' Trim trailing or leading whitespace from a string.
 strtrim <- function(string){
+  classes <- class(string[[1]])
   string <- sub('^\\s*', '', string)
-  sub('\\s*$', '', string)
+  string <- sub('\\s*$', '', string)
+  class(string) <- classes
+  string
 }
