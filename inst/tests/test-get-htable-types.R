@@ -54,3 +54,9 @@ test_that("others treated as character", {
   types <- getHtableTypes(df)
   expect_equal(types, "text")
 })
+
+test_that("numeric matrix works", {
+  mat <- matrix(rnorm(25), ncol=5)
+  types <- getHtableTypes(mat)
+  expect_equal(types, "numeric")
+})

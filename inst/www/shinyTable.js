@@ -13,11 +13,26 @@ $.extend(shinyTableOutputBinding, {
     
     //TODO: Is there some jQuery builtin for this?
     cols = [];
-    for (var i = 0; i < htable.colnames.length; i++){
-      cols.push({
-        type: htable.types[i]
-      });
+    if (htable.data.length === htable.types.length && 
+        htable.types instanceof Array){
+      // One type for each column, data.frame-like object.
+      for (var i = 0; i < htable.data.length; i++){
+        cols.push({
+          type: htable.types[i]
+        });
+      }  
+    } else if (typeof htable.types === 'string'){
+      for (var i = 0; i < htable.data.length; i++){
+        // one type globally, like a matrix. Use the same type everywhere.
+        cols.push({
+          type: htable.types,
+          format: '0.00'
+        });
+      }  
     }
+    
+    //massage into handsontable-friendly format
+    
     
     var settings = {
       readOnly: false,

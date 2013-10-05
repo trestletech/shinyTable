@@ -34,14 +34,10 @@ renderHtable <- function(expr, env = parent.frame(),
       
       .oldTables[[shinysession$token]][[name]] <- data
       
-      #TODO: surely a faster way to convert data.frame to array of arrays...
-      arrayData <- t(apply(data, 1, as.character))
-      cnames <- colnames(data)
       types <- getHtableTypes(data)
       
       return(list(
-        data = arrayData,
-        colnames = cnames,
+        data = data,        
         types = types
       ))  
     } else{
