@@ -1,4 +1,23 @@
 (function(){
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+
+if (!Object.keys){
+  Object.keys = function(obj) {
+      var key;
+      var keys=[];
+      for (key in obj) {
+          if (obj.hasOwnProperty(key)) keys.push(key);
+      }
+      return keys;
+  };
+}
+  
 var shinyTableOutputBinding = new Shiny.OutputBinding();
 $.extend(shinyTableOutputBinding, {
   find: function(scope) {
@@ -11,12 +30,12 @@ $.extend(shinyTableOutputBinding, {
     
     Shiny.onInputChange('.clientdata_output_' + el.id + '_init', true, false);
     
-    //TODO: Is there some jQuery builtin for this?
+    
     cols = [];
-    if (htable.data.length === htable.types.length && 
+    if (Object.size(htable.data) === htable.types.length && 
         htable.types instanceof Array){
       // One type for each column, data.frame-like object.
-      for (var i = 0; i < htable.data.length; i++){
+      for (var i = 0; i < Object.size(htable.data); i++){
         cols.push({
           type: htable.types[i]
         });
@@ -31,8 +50,23 @@ $.extend(shinyTableOutputBinding, {
       }  
     }
     
-    //massage into handsontable-friendly format
     
+    //massage into handsontable-friendly format
+    if (!(htable.data instanceof Array)){
+      // object, needs to be parsed by row
+      var buffer = Array();
+      var row;
+      var keys = Object.keys(htable.data);
+      for (var i = 0; i < htable.data[Object.keys(htable.data)[0]].length; i++){
+        row = Array();
+        for (var col = 0; col < Object.size(htable.data); col++){
+          var key = keys[col];
+          row.push(htable.data[key][i]);
+        }
+        buffer.push(row);
+      }
+      htable.data = buffer;
+    }
     
     var settings = {
       readOnly: false,

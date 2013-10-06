@@ -10,11 +10,12 @@ shinyServer(function(input, output, session) {
     if (is.null(input$tbl)){
       rows <- 5
       # Seed the element with some data initially
-      tbl <- data.frame(list(num1=as.character(1:rows), 
-                      num2=as.character((1:rows)+5),
+      tbl <- data.frame(list(num1=1:rows, 
+                      num2=(1:rows)+5,
                       letter=LETTERS[1:(rows)]))
       
       cachedTbl <<- tbl
+      print (sapply(tbl, class))
       return(tbl)
     } else{
       # Updates from client. The server has been made aware and can do some
@@ -27,8 +28,8 @@ shinyServer(function(input, output, session) {
           as.character(cachedTbl[is.na(as.integer(as.character(tbl[,1]))),1])
       
       print(tbl)
-      
-      #tbl[as.integer(as.character(tbl[,1])) >= 100,1] <- 99
+      print (sapply(input$tbl, class))
+            tbl[as.integer(as.character(tbl[,1])) >= 100,1] <- 99
       cachedTbl <<- tbl
       return(tbl)
     }
