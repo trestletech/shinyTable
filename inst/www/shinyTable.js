@@ -38,7 +38,7 @@ $.extend(shinyTableOutputBinding, {
         var thisChange = rejected[i].change[0];
         // safe to assume tbl exists.
         tbl.setDataAtCell(thisChange[0], thisChange[1], 
-            thisChange[2], 'server-update');
+            thisChange[2], 'rejected-change');
       }    
       if (Object.size(htable) == 1){
         // has no other properties.
@@ -212,7 +212,7 @@ $.extend(shinyTableInputBinding, {
       delete changeRegistry[el.id];
       return {changes: changes, cycle: getCycle(el.id)};
     }
-    return null;
+    return {cycle: getCycle(el.id)};
   },
   setValue: function(el, value) {
     //TODO
@@ -234,7 +234,12 @@ $.extend(shinyTableInputBinding, {
         }
         changeRegistry[el.id] = changes;
         
-        cacheChange(el.id, changes);        
+        // If the change was rejected by the server, we do want to callback, 
+        // so the server can properly update the input, but we don't need to
+        // cache the change to support rollback.
+        if (source !== 'rejected-change'){
+          cacheChange(el.id, changes);
+        }
         
         callback(false);
       }

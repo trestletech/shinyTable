@@ -14,8 +14,7 @@ shinyServer(function(input, output, session) {
                       num2=(1:rows)+5,
                       letter=LETTERS[1:(rows)]))
       
-      cachedTbl <<- tbl
-      print (sapply(tbl, class))
+      cachedTbl <<- tbl      
       return(tbl)
     } else{
       # Updates from client. The server has been made aware and can do some
@@ -23,13 +22,11 @@ shinyServer(function(input, output, session) {
       # case, we'll filter any number >= 100 in the first column.
       tbl <- input$tbl
       
-      # Any non-numeric data should be replaced
+      # Any non-numeric data should be replaced with the cached data.
       tbl[is.na(as.integer(as.character(tbl[,1]))),1] <- 
           as.character(cachedTbl[is.na(as.integer(as.character(tbl[,1]))),1])
       
-      print(tbl)
-      print (sapply(input$tbl, class))
-            tbl[as.integer(as.character(tbl[,1])) >= 100,1] <- 99
+      tbl[as.integer(as.character(tbl[,1])) >= 100,1] <- 99
       cachedTbl <<- tbl
       return(tbl)
     }

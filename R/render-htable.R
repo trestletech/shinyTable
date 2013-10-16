@@ -38,7 +38,6 @@ renderHtable <- function(expr, validationExpr, env = parent.frame(),
     if (!is.null(vfunc)){
       vals <- as.matrix(vfunc())
       if (nrow(vals) > 0 && ncol(vals) > 0){
-        print("vfunc")
         # If there are colnames, it serializes as an object...
         colnames(vals) <- NULL
         shinysession$session$sendCustomMessage("htable-validation", 
@@ -74,7 +73,7 @@ renderHtable <- function(expr, validationExpr, env = parent.frame(),
       }
       
       delta <- calcHtableDelta(.oldTables[[shinysession$token]][[name]], data)
-      
+            
       # Avoid the awkward serialization of a row-less matrix in RJSONIO
       if (nrow(delta) == 0){
         delta <- NULL
