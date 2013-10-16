@@ -33,5 +33,7 @@ shinyServer(function(input, output, session) {
       cachedTbl <<- tbl
       return(tbl)
     }
+  }, {
+    return (input$tbl != "A")
   })  
 })
