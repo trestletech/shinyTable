@@ -13,22 +13,6 @@ htable <- function(outputId, headers=c("enabled", "disabled", "provided")){
   
   headers <- match.arg(headers)
   
-  tryCatch({
-    # Try adding the input handler, it will stop if there's already a handler.
-    # Perhaps should consider adding an exists() function for input handlers.
-    addInputType("htable", function(val, shinysession, name){
-      changes <- val$changes[[1]]
-      cycle <- val$cycle
-      
-      .cycleCount[[shinysession$token]][[name]] <- cycle
-      oldTbl <- .oldTables[[shinysession$token]][[name]]
-      
-      tbl <- applyTableChanges(oldTbl, changes)
-      
-      tbl
-    })
-  }, error=function(e){})
-  
   tagList(
     singleton(tags$head(
       initResourcePaths(),

@@ -2,7 +2,8 @@
 \alias{renderHtable}
 \title{Render a Handsontable Element}
 \usage{
-  renderHtable(expr, env = parent.frame(), quoted = FALSE)
+  renderHtable(expr, validationExpr, env = parent.frame(),
+    quoted = FALSE)
 }
 \arguments{
   \item{expr}{The expression to be evaluated which should
