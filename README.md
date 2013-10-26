@@ -28,7 +28,7 @@ installed, as well.
 install.packages("devtools")
 
 library(devtools)
-install_github("shiny", "trestletech")
+install_github("shiny", "trestletech", "input-registry")
 install_github("shinyTable", "trestletech")
 ```
 
