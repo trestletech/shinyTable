@@ -76,6 +76,15 @@ $.extend(shinyTableOutputBinding, {
       columns: cols
     };
     
+    var headersMode = $(el).data('htable-headers');
+    if (headersMode == 'enabled'){      
+      settings.colHeaders = true;
+    } else if (headersMode == 'disabled'){ 
+      settings.colHeaders = false;
+    } else if (headersMode == 'provided' && htable.headers){
+      settings.colHeaders = htable.headers;  
+    }
+    
     var tbl = $(el).handsontable('getInstance');
     if (tbl){
       //already exists, just update

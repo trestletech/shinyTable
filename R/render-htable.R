@@ -38,7 +38,8 @@ renderHtable <- function(expr, env = parent.frame(),
       
       return(list(
         data = data,        
-        types = types
+        types = types,
+        headers = colnames(data)
       ))  
     } else{
       # input stores the state captured currently on the client. Just send the 
