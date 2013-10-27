@@ -1,0 +1,14 @@
+.shiny-htable td.invalid{
+  background: #C66;
+  color: #FFF;
+}
+
+.shiny-htable td.warning{
+  background: #FE7;
+  color: #630;
+}
+
+.shiny-htable td.valid{
+  background: #FFF;
+  color: #000;
+}

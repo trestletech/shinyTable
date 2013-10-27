@@ -271,34 +271,63 @@ Shiny.addCustomMessageHandler('htable-change', function(data) {
       change.new,
       "server-update");
   };
+  applyStyles(data.id);
 });
 
-function validCellRenderer(instance, td, row, col, prop, value, cellProperties) {
-  Handsontable.TextCell.renderer.apply(this, arguments);
-  td.style.color = 'black';
-  td.style.background = '#FFF';
-}
+cellClasses = {};
 
-function invalidCellRenderer(instance, td, row, col, prop, value, cellProperties) {
-  Handsontable.TextCell.renderer.apply(this, arguments);
-  td.style.color = 'white';
-  td.style.background = '#B55';
-}
-
-Shiny.addCustomMessageHandler('htable-validation', function(data) {
+Shiny.addCustomMessageHandler('htable-style', function(data) {
   var $el = $('#' + data.id);
-  if (!$el || !data.valid)
+  if (!$el || !data.style)
     return;
 
-  var tbl = $el.handsontable('getInstance');
-  tbl.updateSettings({cells: function(row, col, prop){
-    if(data.valid[row][col]){
-      //valid
-      return {renderer: validCellRenderer};
-    } else{
-      return {renderer: invalidCellRenderer};
+  if (!cellClasses[data.id]){
+    cellClasses[data.id] = {};
+  }
+
+  var style = data.style;
+  
+  // Convert to arrays if they're not already
+  style.row = [].concat(style.row);
+  style.col = [].concat(style.col);
+  
+  for (var r = 0; r < style.row.length; r++){
+    var row = style.row[r];
+    if (!cellClasses[data.id][row]){
+      cellClasses[data.id][row] = {};
     }
-  }});
+    
+    for (var c = 0; c < style.col.length; c++){
+      var col = style.col[c];
+      
+      cellClasses[data.id][row][col] = style.cssClass;
+    }
+  }
+  
+  applyStyles(data.id);
 });
+
+function applyStyles(id){
+  if (!cellClasses[id]){
+    return;
+  }
+  
+  var $el = $('#' + id);
+  var tbl = $el.handsontable('getInstance');
+  
+  var rows = Object.keys(cellClasses[id]);
+  $.each(rows, function(i, row){
+    var cols = Object.keys(cellClasses[id][row]);
+    $.each(cols, function(j, col){
+      var td = tbl.getCell(row, col);
+      
+      // Clear out existing styles
+      while (td.classList.length > 0){
+        td.classList.remove(td.classList[0]);
+      }
+      td.classList.add(cellClasses[id][row][col]);
+    });
+  });
+}
 
 })();

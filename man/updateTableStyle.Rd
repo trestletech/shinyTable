@@ -1,0 +1,29 @@
+\name{updateTableStyle}
+\alias{updateTableStyle}
+\title{Update the styling of a cell}
+\usage{
+  updateTableStyle(session, tableID, class, row, col)
+}
+\arguments{
+  \item{session}{The associated shiny session}
+
+  \item{tableID}{The ID of the table we are to update}
+
+  \item{class}{The class to set for this table element. You
+  are free to define your own CSS to dictate the styling
+  for any class. Three class names are provided with
+  shinyTable: 'valid' (the default), 'invalid', and
+  'warning'.}
+
+  \item{row}{The row number of the cell (1-indexed).}
+
+  \item{col}{The column number of the cell to update
+  (1-indexed)}
+}
+\description{
+  Update the style of a particular cell.
+}
+\author{
+  Jeff Allen \email{jeff@trestletech.com}
+}
+

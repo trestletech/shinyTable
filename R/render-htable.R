@@ -11,13 +11,8 @@
 #' @importFrom shiny exprToFunction
 #' @author Jeff Allen \email{jeff@@trestletech.com}
 #' @export
-renderHtable <- function(expr, validationExpr, env = parent.frame(), 
+renderHtable <- function(expr, env = parent.frame(), 
                         quoted = FALSE){
-  
-  vfunc <- NULL
-  if (!missing(validationExpr)){
-    vfunc <- exprToFunction(validationExpr, env, quoted)
-  }
   func <- exprToFunction(expr, env, quoted)
   
   function(shinysession, name, ...) {
@@ -32,17 +27,6 @@ renderHtable <- function(expr, validationExpr, env = parent.frame(),
       #TODO: Optimize
       for (col in factorInd){
         data[,col] <- as.character(data[,col])
-      }
-    }
-    
-    if (!is.null(vfunc)){
-      vals <- as.matrix(vfunc())
-      if (nrow(vals) > 0 && ncol(vals) > 0){
-        # If there are colnames, it serializes as an object...
-        colnames(vals) <- NULL
-        shinysession$session$sendCustomMessage("htable-validation", 
-                                             list(id=name, 
-                                                  valid=vals))
       }
     }
     

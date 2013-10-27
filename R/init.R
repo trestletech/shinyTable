@@ -7,5 +7,6 @@ initResourcePaths <- function() {
       directoryPath = system.file('www', package='shinyTable'))
     .global$loaded <- TRUE
   }
-  HTML("")
+  includeCSS(system.file("bundled-css.css", package="shinyTable"))
+  
 }

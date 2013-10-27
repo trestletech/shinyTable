@@ -6,13 +6,25 @@ library(shinyTable)
 shinyServer(function(input, output, session) {
   cachedTbl <- NULL
   
+  validate <- function(tbl){
+    updateTableStyle(session, "tbl", "valid", 
+                     which(as.numeric(tbl$num2) < 50), 2)
+    updateTableStyle(session, "tbl", "warning", 
+                     which(as.numeric(tbl$num2) >= 50 & 
+                             as.numeric(tbl$num2) < 100), 2)
+    updateTableStyle(session, "tbl", "invalid", 
+                     which(as.numeric(tbl$num2) >= 100), 2)    
+  }
+  
   output$tbl <- renderHtable({
     if (is.null(input$tbl)){
       rows <- 5
       # Seed the element with some data initially
       tbl <- data.frame(list(num1=1:rows, 
-                      num2=(1:rows)+5,
+                      num2=(1:rows)*20,
                       letter=LETTERS[1:(rows)]))
+      
+      validate(tbl)
       
       cachedTbl <<- tbl      
       return(tbl)
@@ -25,12 +37,12 @@ shinyServer(function(input, output, session) {
       # Any non-numeric data should be replaced with the cached data.
       tbl[is.na(as.integer(as.character(tbl[,1]))),1] <- 
           as.character(cachedTbl[is.na(as.integer(as.character(tbl[,1]))),1])
+   
+      validate(tbl)
       
       tbl[as.integer(as.character(tbl[,1])) >= 100,1] <- 99
       cachedTbl <<- tbl
       return(tbl)
     }
-  }, {
-    return (input$tbl != "A")
   })  
 })
