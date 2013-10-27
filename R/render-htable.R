@@ -1,4 +1,5 @@
 .oldTables <- new.env()
+.cycleCount <- new.env()
 
 #' Render a Handsontable Element
 #' 
@@ -10,10 +11,15 @@
 #' @importFrom shiny exprToFunction
 #' @author Jeff Allen \email{jeff@@trestletech.com}
 #' @export
-renderHtable <- function(expr, env = parent.frame(), 
+renderHtable <- function(expr, validationExpr, env = parent.frame(), 
                         quoted = FALSE){
   
+  vfunc <- NULL
+  if (!missing(validationExpr)){
+    vfunc <- exprToFunction(validationExpr, env, quoted)
+  }
   func <- exprToFunction(expr, env, quoted)
+  
   function(shinysession, name, ...) {
     data <- func()
     
@@ -22,10 +28,21 @@ renderHtable <- function(expr, env = parent.frame(),
     if (any(factorInd)){
       warning ("Factors aren't currently supported. Will convert using as.character().")
       
-      # Doesn't work with multiple columns at once.
+      # Doesn't work with multiple columns at once, so iterate.
       #TODO: Optimize
       for (col in factorInd){
         data[,col] <- as.character(data[,col])
+      }
+    }
+    
+    if (!is.null(vfunc)){
+      vals <- as.matrix(vfunc())
+      if (nrow(vals) > 0 && ncol(vals) > 0){
+        # If there are colnames, it serializes as an object...
+        colnames(vals) <- NULL
+        shinysession$session$sendCustomMessage("htable-validation", 
+                                             list(id=name, 
+                                                  valid=vals))
       }
     }
     
@@ -37,10 +54,11 @@ renderHtable <- function(expr, env = parent.frame(),
       types <- getHtableTypes(data)
       
       return(list(
-        data = data,        
+        data = data,
         types = types,
-        headers = colnames(data)
-      ))  
+        headers = colnames(data),
+        cycle = .cycleCount[[shinysession$token]][[name]]
+      ))
     } else{
       # input stores the state captured currently on the client. Just send the 
       # delta
@@ -55,7 +73,7 @@ renderHtable <- function(expr, env = parent.frame(),
       }
       
       delta <- calcHtableDelta(.oldTables[[shinysession$token]][[name]], data)
-      
+            
       # Avoid the awkward serialization of a row-less matrix in RJSONIO
       if (nrow(delta) == 0){
         delta <- NULL
@@ -67,10 +85,11 @@ renderHtable <- function(expr, env = parent.frame(),
       
       shinysession$session$sendCustomMessage("htable-change", 
                                              list(id=name, 
-                                                  changes=delta))
+                                                  changes=delta,
+                                                  cycle=.cycleCount[[shinysession$token]][[name]]))
       
       # Don't return any data, changes have already been sent.
-      return(NULL)
+      return(list(cycle=.cycleCount[[shinysession$token]][[name]]))
     }
   }
 }

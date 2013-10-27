@@ -15,9 +15,9 @@ getHtableTypes <- function(data){
   
   types <- sapply(types, function(type){
     switch(type,
-           integer="numeric",
-           double="numeric",
-           numeric="numeric",
+           integer="text",
+           double="text",
+           numeric="text",
            character="text",
            logical="checkbox",
            factor="text",

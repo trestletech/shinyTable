@@ -28,9 +28,26 @@ $.extend(shinyTableOutputBinding, {
       return;
     }
     
+    var tbl = $(el).handsontable('getInstance');
+    
+    if (htable.hasOwnProperty('cycle')){
+      // Null output, just syncing state with the client.
+      var rejected = flushChanges(el.id, htable.cycle);
+      for (var i = 0; i < rejected.length; i++){
+        console.log("Reverting rejected change");
+        var thisChange = rejected[i].change[0];
+        // safe to assume tbl exists.
+        tbl.setDataAtCell(thisChange[0], thisChange[1], 
+            thisChange[2], 'rejected-change');
+      }    
+      if (Object.size(htable) == 1){
+        // has no other properties.
+        return;
+      }
+    }
+    
     Shiny.onInputChange('.clientdata_output_' + el.id + '_init', true, false);
-    
-    
+        
     cols = [];
     if (Object.size(htable.data) === htable.types.length && 
         htable.types instanceof Array){
@@ -85,7 +102,6 @@ $.extend(shinyTableOutputBinding, {
       settings.colHeaders = htable.headers;  
     }
     
-    var tbl = $(el).handsontable('getInstance');
     if (tbl){
       //already exists, just update
       tbl.updateSettings(settings)
@@ -102,6 +118,7 @@ Shiny.outputBindings.register(shinyTableOutputBinding, 'shinyTable.tableBinding'
  * we're not able to pass the changes into the function, so we need to store it
  * externally. The changes will be stored here, indexed by the ID.
  */
+ //TODO: Just use the changeCache, will support more than one event.
 var changeRegistry = {};
 
 /**
@@ -132,6 +149,55 @@ function deregisterCallbacks(table, element){
   delete callbacks[element.id];
 }
 
+
+var changeCache = {}
+function cacheChange(elementId, change){
+  if (!changeCache[elementId]){
+    changeCache[elementId] = [];
+  }
+  changeCache[elementId].push({
+    cycle: getCycle(elementId, true),
+    change: change
+  });
+}
+/**
+ * Flushes all the changes out of the cache that equal or predate the given
+ * cycle number.
+ */
+function flushChanges(elementId, cycle){
+  var changes = [];
+  if (!changeCache[elementId]){
+    return changes;
+  }
+  
+  while (changeCache[elementId].length > 0 && 
+      changeCache[elementId][0].cycle <= cycle){
+    changes.push(changeCache[elementId].shift());
+  }
+  return changes;
+}
+
+/**
+ * Keep a count of what cycle each element is on. Monotonically increasing
+ * counter will be echoed by server so we can keep everythin in sync. We are
+ * blending reactive model of Shiny with the Command pattern of handsontable,
+ * afterall... God help us.
+ */
+var cycleCounts = {};
+function getCycle(elementId, increment){
+  if (typeof increment === 'undefined' || arguments.length < 2){
+    increment = false;
+  }
+  if (cycleCounts[elementId]){
+    if (increment){
+      cycleCounts[elementId]++;
+    }    
+    return cycleCounts[elementId];
+  }
+  cycleCounts[elementId] = 1;
+  return 1;
+}
+
 var shinyTableInputBinding = new Shiny.InputBinding();
 $.extend(shinyTableInputBinding, {
   find: function(scope) {
@@ -144,9 +210,9 @@ $.extend(shinyTableInputBinding, {
     if (changeRegistry[el.id]){
       var changes = changeRegistry[el.id];
       delete changeRegistry[el.id];
-      return changes;
+      return {changes: changes, cycle: getCycle(el.id)};
     }
-    return null;
+    return {cycle: getCycle(el.id)};
   },
   setValue: function(el, value) {
     //TODO
@@ -168,6 +234,13 @@ $.extend(shinyTableInputBinding, {
         }
         changeRegistry[el.id] = changes;
         
+        // If the change was rejected by the server, we do want to callback, 
+        // so the server can properly update the input, but we don't need to
+        // cache the change to support rollback.
+        if (source !== 'rejected-change'){
+          cacheChange(el.id, changes);
+        }
+        
         callback(false);
       }
     })
@@ -182,20 +255,50 @@ Shiny.inputBindings.register(shinyTableInputBinding);
 
 Shiny.addCustomMessageHandler('htable-change', function(data) {
   var $el = $('#' + data.id);
-  if (!$el || !data.changes)
+  if (!$el || !data.changes || !data.cycle)
     return;
 
+  // Flush any changes prior to the given cycle, as they've just been 
+  // acknowledged.
+  flushChanges(data.id, data.cycle);
+  
   var tbl = $el.handsontable('getInstance');
   for( var i = 0; i < data.changes.length; i++){
     var change = data.changes[i];
-    console.log("Change = ");
-    console.log(change);
     tbl.setDataAtCell(
       parseInt(change.row), 
       parseInt(change.col),
       change.new,
       "server-update");
   };
+});
+
+function validCellRenderer(instance, td, row, col, prop, value, cellProperties) {
+  Handsontable.TextCell.renderer.apply(this, arguments);
+  td.style.color = 'black';
+  td.style.background = '#FFF';
+}
+
+function invalidCellRenderer(instance, td, row, col, prop, value, cellProperties) {
+  Handsontable.TextCell.renderer.apply(this, arguments);
+  td.style.color = 'white';
+  td.style.background = '#B55';
+}
+
+Shiny.addCustomMessageHandler('htable-validation', function(data) {
+  var $el = $('#' + data.id);
+  if (!$el || !data.valid)
+    return;
+
+  var tbl = $el.handsontable('getInstance');
+  tbl.updateSettings({cells: function(row, col, prop){
+    if(data.valid[row][col]){
+      //valid
+      return {renderer: validCellRenderer};
+    } else{
+      return {renderer: invalidCellRenderer};
+    }
+  }});
 });
 
 })();
