@@ -14,13 +14,13 @@ test_that("character factor works", {
 test_that("integer works", {
   df <- data.frame(list(a=1:2))
   types <- getHtableTypes(df)
-  expect_equal(types, "numeric")
+  expect_equal(types, "text")
 })
 
 test_that("double works", {
   df <- data.frame(list(a=rnorm(2)))
   types <- getHtableTypes(df)
-  expect_equal(types, "numeric")
+  expect_equal(types, "text")
 })
 
 test_that("logical works", {
@@ -45,7 +45,7 @@ test_that ("mixed works", {
       e=c(TRUE, FALSE)
     ))
   types <- getHtableTypes(df)
-  expect_equal(types, c("date", "numeric", "numeric", "text", "checkbox"))
+  expect_equal(types, c("date", "text", "text", "text", "checkbox"))
 })
 
 test_that("others treated as character", {
@@ -58,5 +58,5 @@ test_that("others treated as character", {
 test_that("numeric matrix works", {
   mat <- matrix(rnorm(25), ncol=5)
   types <- getHtableTypes(mat)
-  expect_equal(types, "numeric")
+  expect_equal(types, "text")
 })
