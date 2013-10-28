@@ -8,6 +8,8 @@
 #'   provice `r2` and `c2` variables to specify the "stop" row and columns,
 #'   which may be relevant if a range of cells are selected. Or all will be NA 
 #'   if no cell is selected.
+#' @param readOnly If TRUE, client-side editing the table will be disabled. By 
+#'   default, will be FALSE to enable editing.
 #' @param headers Sets the way column headers should be displayed on the table.
 #'   \code{enabled} implies that the default column names (progression through
 #'   the alphabet) should be used. \code{disabled} implies that column headings
@@ -15,7 +17,8 @@
 #'   names should be extracted from the R object being displayed.
 #' @author Jeff Allen \email{jeff@@trestletech.com}
 #' @export
-htable <- function(outputId, clickId = NULL, headers=c("enabled", "disabled", "provided")){
+htable <- function(outputId, clickId = NULL, readOnly = FALSE,
+                   headers=c("enabled", "disabled", "provided")){
   
   headers <- match.arg(headers)
   
@@ -30,6 +33,7 @@ htable <- function(outputId, clickId = NULL, headers=c("enabled", "disabled", "p
     )),
     div(id=outputId, class="shiny-htable", 
         `data-htable-headers`=headers,
-        `data-click-id`=clickId) 
+        `data-click-id`=clickId,
+        `data-read-only`=readOnly)
   )
 }

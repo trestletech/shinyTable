@@ -2,7 +2,7 @@
 \alias{htable}
 \title{Render a Handsontable}
 \usage{
-  htable(outputId, clickId = NULL,
+  htable(outputId, clickId = NULL, readOnly = FALSE,
     headers = c("enabled", "disabled", "provided"))
 }
 \arguments{
@@ -16,6 +16,10 @@
   and `c2` variables to specify the "stop" row and columns,
   which may be relevant if a range of cells are selected.
   Or all will be NA if no cell is selected.}
+
+  \item{readOnly}{If TRUE, client-side editing the table
+  will be disabled. By default, will be FALSE to enable
+  editing.}
 
   \item{headers}{Sets the way column headers should be
   displayed on the table.  \code{enabled} implies that the

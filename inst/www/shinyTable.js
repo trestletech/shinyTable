@@ -86,7 +86,7 @@ $.extend(shinyTableOutputBinding, {
     }
     
     var settings = {
-      readOnly: false,
+      readOnly: $(el).data('read-only') || false,
       data: htable.data,
       colHeaders: htable.colnames,
       columnSorting: false,
