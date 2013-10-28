@@ -101,14 +101,36 @@ $.extend(shinyTableOutputBinding, {
     } else if (headersMode == 'provided' && htable.headers){
       settings.colHeaders = htable.headers;  
     }
+  
+    tbl.updateSettings(settings)
     
-    if (tbl){
-      //already exists, just update
-      tbl.updateSettings(settings)
-    } else{
-      //new table, create from scratch.
-      $(el).handsontable(settings);
+    function clearSelection(){
+      Shiny.onInputChange($(el).data('click-id'), {
+        r1: NaN, c1: NaN, r2: NaN, c2: NaN,
+        ".nonce": Math.random()
+      });
     }
+    
+    if ($(el).data('click-id') && !$(el).data('click-handler')){
+      tbl.addHook('afterDeselect', function(){
+        clearSelection();
+      });
+      
+      // Register a handler for click events
+      $(el).data('click-handler', tbl.addHook('afterSelectionEnd',
+        function(r, c, r2, c2){
+          Shiny.onInputChange($(el).data('click-id'), {
+            r1: r+1, c1: c+1, r2: r2+1, c2: c2+1,
+            ".nonce": Math.random()
+          });
+        })
+      );
+      
+      // Seed the input with NAs.
+      clearSelection();
+    }
+    
+    
   }
 });
 Shiny.outputBindings.register(shinyTableOutputBinding, 'shinyTable.tableBinding');
