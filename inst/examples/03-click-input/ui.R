@@ -14,7 +14,7 @@ shinyUI(pageWithSidebar(
   
   # Show the simple table
   mainPanel(
-    htable("tbl", clickId="tblClick", headers="provided"),
+    htable("tbl", clickId="tblClick", colHeaders="provided"),
     h3("Current Selection"),
     verbatimTextOutput("clickText")
   )

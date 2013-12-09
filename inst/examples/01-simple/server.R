@@ -23,7 +23,7 @@ shinyServer(function(input, output, session) {
       tbl <- data.frame(list(num1=1:rows, 
                       num2=(1:rows)*20,
                       letter=LETTERS[1:(rows)]))
-      
+      rownames(tbl) <- LETTERS[2:(rows+1)]
       validate(tbl)
       
       cachedTbl <<- tbl      

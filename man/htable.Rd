@@ -3,7 +3,8 @@
 \title{Render a Handsontable}
 \usage{
   htable(outputId, clickId = NULL, readOnly = FALSE,
-    headers = c("enabled", "disabled", "provided"),
+    colHeaders = c("enabled", "disabled", "provided"),
+    rowHeaders = c("disabled", "enabled", "provided"),
     minRows = 0, minCols = 0, width = 0, height = 0)
 }
 \arguments{

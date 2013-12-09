@@ -22,10 +22,12 @@
 #' @author Jeff Allen \email{jeff@@trestletech.com}
 #' @export
 htable <- function(outputId, clickId = NULL, readOnly = FALSE,
-                   headers=c("enabled", "disabled", "provided"), 
+                   colHeaders=c("enabled", "disabled", "provided"), 
+                   rowHeaders=c("disabled", "enabled", "provided"), 
                    minRows=0, minCols=0, width=0, height=0){
   
-  headers <- match.arg(headers)
+  rowHeaders <- match.arg(rowHeaders)
+  colHeaders <- match.arg(colHeaders)
   
   tagList(
     singleton(tags$head(
@@ -37,7 +39,8 @@ htable <- function(outputId, clickId = NULL, readOnly = FALSE,
                 href = 'shinyTable/jquery.handsontable.full.css')
     )),
     div(id=outputId, class="shiny-htable", 
-        `data-htable-headers`=headers,
+        `data-htable-col-names`=colHeaders,
+        `data-htable-row-names`=rowHeaders,
         `data-click-id`=clickId,
         `data-read-only`=readOnly,
         `data-min-rows`=minRows,
