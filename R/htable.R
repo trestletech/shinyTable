@@ -15,10 +15,15 @@
 #'   the alphabet) should be used. \code{disabled} implies that column headings
 #'   should be disabled completely. \code{provided} implies that the column
 #'   names should be extracted from the R object being displayed.
+#' @param minRows The minimum number of rows to be included in the table.
+#' @param minCols The minimum number of columns to be included in the table.
+#' @param width The width of the table in pixels.
+#' @param height The height of the table in pixels.
 #' @author Jeff Allen \email{jeff@@trestletech.com}
 #' @export
 htable <- function(outputId, clickId = NULL, readOnly = FALSE,
-                   headers=c("enabled", "disabled", "provided")){
+                   headers=c("enabled", "disabled", "provided"), 
+                   minRows=0, minCols=0, width=0, height=0){
   
   headers <- match.arg(headers)
   
@@ -34,6 +39,10 @@ htable <- function(outputId, clickId = NULL, readOnly = FALSE,
     div(id=outputId, class="shiny-htable", 
         `data-htable-headers`=headers,
         `data-click-id`=clickId,
-        `data-read-only`=readOnly)
+        `data-read-only`=readOnly,
+        `data-min-rows`=minRows,
+        `data-min-cols`=minCols,
+        `data-width` = as.numeric(width),
+        `data-height` = as.numeric(height))
   )
 }

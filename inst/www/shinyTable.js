@@ -90,8 +90,18 @@ $.extend(shinyTableOutputBinding, {
       data: htable.data,
       colHeaders: htable.colnames,
       columnSorting: false,
-      columns: cols
+      columns: cols,
+      minRows: $(el).data('min-rows'),
+      minCols: $(el).data('min-cols')
     };
+    
+    if ($(el).data('width')){
+      settings.width = $(el).data('width');  
+    }
+    
+    if ($(el).data('height')){
+      settings.height = $(el).data('height');  
+    }
     
     var headersMode = $(el).data('htable-headers');
     if (headersMode == 'enabled'){      

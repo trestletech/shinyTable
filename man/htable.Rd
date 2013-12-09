@@ -3,7 +3,8 @@
 \title{Render a Handsontable}
 \usage{
   htable(outputId, clickId = NULL, readOnly = FALSE,
-    headers = c("enabled", "disabled", "provided"))
+    headers = c("enabled", "disabled", "provided"),
+    minRows = 0, minCols = 0, width = 0, height = 0)
 }
 \arguments{
   \item{outputId}{The ID of the \code{glOutput} associated
@@ -28,6 +29,16 @@
   headings should be disabled completely. \code{provided}
   implies that the column names should be extracted from
   the R object being displayed.}
+
+  \item{minRows}{The minimum number of rows to be included
+  in the table.}
+
+  \item{minCols}{The minimum number of columns to be
+  included in the table.}
+
+  \item{width}{The width of the table in pixels.}
+
+  \item{height}{The height of the table in pixels.}
 }
 \description{
   Render a Handsontable in an application page.
