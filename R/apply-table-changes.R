@@ -50,7 +50,10 @@ applyChange <- function(table, change, trim=TRUE){
     new <- strtrim(new)
   }
   
-  if (as.character(table[row,col]) != as.character(old)){
+  old <- ifelse( is.na(old), "", as.character(old) )
+  trc <- ifelse( is.na(table[row, col]), "", as.character(table[row, col]) )
+  
+  if ( trc != old ){
     warning(paste("The old value for the cell in the change provided ('", 
                   table[row, col],
                   "') does not match the value provided by the client ('",

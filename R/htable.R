@@ -21,7 +21,7 @@
 #' @param height The height of the table in pixels.
 #' @author Jeff Allen \email{jeff@@trestletech.com}
 #' @export
-htable <- function(outputId, clickId = NULL, readOnly = FALSE,
+htable <- function(outputId, clickId = NULL, readOnly = 'false',
                    headers=c("enabled", "disabled", "provided"), 
                    minRows=0, minCols=0, width=0, height=0){
   
