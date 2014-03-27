@@ -2,7 +2,7 @@
 \alias{applyTableChanges}
 \title{Apply Changes to Htable}
 \usage{
-  applyTableChanges(table, changes, trim = TRUE)
+applyTableChanges(table, changes, trim = TRUE)
 }
 \arguments{
   \item{table}{The htable data.frame}
@@ -17,12 +17,12 @@
   trailing whitespace from the relevant values.}
 }
 \value{
-  The data.frame provided with the changes applied
+The data.frame provided with the changes applied
 }
 \description{
-  Apply the changes as passed from htable to a data.frame
+Apply the changes as passed from htable to a data.frame
 }
 \author{
-  Jeff Allen \email{jeff@trestletech.com}
+Jeff Allen \email{jeff@trestletech.com}
 }
 

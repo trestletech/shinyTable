@@ -2,7 +2,7 @@
 \alias{applyChange}
 \title{Apply a single change to the table.}
 \usage{
-  applyChange(table, change, trim = TRUE)
+applyChange(table, change, trim = TRUE)
 }
 \arguments{
   \item{table}{The htable data.frame}
@@ -15,12 +15,12 @@
   trailing whitespace from the relevant values.}
 }
 \value{
-  The data.frame provided with the change applied.
+The data.frame provided with the change applied.
 }
 \description{
-  Apply a single change to the table.
+Apply a single change to the table.
 }
 \author{
-  Jeff Allen \email{jeff@trestletech.com}
+Jeff Allen \email{jeff@trestletech.com}
 }
 

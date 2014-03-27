@@ -2,7 +2,7 @@
 \alias{updateTableStyle}
 \title{Update the styling of a cell}
 \usage{
-  updateTableStyle(session, tableID, class, row, col)
+updateTableStyle(session, tableID, class, row, col)
 }
 \arguments{
   \item{session}{The associated shiny session}
@@ -21,9 +21,9 @@
   (1-indexed)}
 }
 \description{
-  Update the style of a particular cell.
+Update the style of a particular cell.
 }
 \author{
-  Jeff Allen \email{jeff@trestletech.com}
+Jeff Allen \email{jeff@trestletech.com}
 }
 

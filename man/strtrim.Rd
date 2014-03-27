@@ -2,9 +2,9 @@
 \alias{strtrim}
 \title{Trim trailing or leading whitespace from a string.}
 \usage{
-  strtrim(string)
+strtrim(string)
 }
 \description{
-  Trim trailing or leading whitespace from a string.
+Trim trailing or leading whitespace from a string.
 }
 

@@ -1,7 +1,6 @@
 export(applyTableChanges)
 export(calcHtableDelta)
 export(htable)
-export(parseShinyInput.htable)
 export(renderHtable)
 export(updateTableStyle)
 importFrom(shiny,exprToFunction)
