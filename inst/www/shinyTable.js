@@ -86,7 +86,7 @@ $.extend(shinyTableOutputBinding, {
     }
     
     var settings = {
-      readOnly: $(el).data('read-only') || false,
+      readOnly: processBooleanString($(el).data('read-only')) || false,
       data: htable.data,
       colHeaders: htable.colnames,
       columnSorting: false,
@@ -139,11 +139,26 @@ $.extend(shinyTableOutputBinding, {
       // Seed the input with NAs.
       clearSelection();
     }
-    
-    
   }
 });
 Shiny.outputBindings.register(shinyTableOutputBinding, 'shinyTable.tableBinding');
+
+/**
+ * For some reason we are getting string "FALSE" instead of Booleans, just 
+ * detect these kinds of things here.
+ **/
+function processBooleanString(str){
+  if (typeof str === 'boolean'){
+    return str;
+  }
+  
+  if (str.match(/^t/i)){
+    return true;
+  } else if (str.match(/^f/i)){
+    return false;
+  }
+  throw new Error("Cannot process Boolean input string: " + str);
+}
 
 /**
  * Track the changes made to an htable. Due to the arrangement of callbacks, 
