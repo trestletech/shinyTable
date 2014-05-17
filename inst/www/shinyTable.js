@@ -103,13 +103,22 @@ $.extend(shinyTableOutputBinding, {
       settings.height = $(el).data('height');  
     }
     
-    var headersMode = $(el).data('htable-headers');
+    var headersMode = $(el).data('htable-col-names');
     if (headersMode == 'enabled'){      
       settings.colHeaders = true;
     } else if (headersMode == 'disabled'){ 
       settings.colHeaders = false;
     } else if (headersMode == 'provided' && htable.headers){
-      settings.colHeaders = htable.headers;  
+      settings.colHeaders = htable.headers;
+    }
+    
+    var rowMode = $(el).data('htable-row-names');
+    if (rowMode == 'enabled'){
+      settings.rowHeaders = true;
+    } else if (rowMode == 'disabled'){ 
+      settings.rowHeaders = false;
+    } else if (rowMode == 'provided' && htable.rownames){
+      settings.rowHeaders = htable.rownames;
     }
   
     tbl.updateSettings(settings)
