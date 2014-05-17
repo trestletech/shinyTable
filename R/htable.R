@@ -15,7 +15,7 @@
 #'   the alphabet) should be used. \code{disabled} implies that column headings
 #'   should be disabled completely. \code{provided} implies that the column
 #'   names should be extracted from the R object being displayed.
-#' @param rowHeaders Sets the way row headers should be displayed on the table.
+#' @param rowNames Sets the way row headers should be displayed on the table.
 #'   \code{enabled} implies that the default row names (incrementing integers)
 #'   should be used. \code{disabled} implies that row names
 #'   should be disabled completely. \code{provided} implies that the row
@@ -28,10 +28,10 @@
 #' @export
 htable <- function(outputId, clickId = NULL, readOnly = FALSE,
                    colHeaders=c("enabled", "disabled", "provided"), 
-                   rowHeaders=c("disabled", "enabled", "provided"), 
+                   rowNames=c("disabled", "enabled", "provided"), 
                    minRows=0, minCols=0, width=0, height=0){
   
-  rowHeaders <- match.arg(rowHeaders)
+  rowNames <- match.arg(rowNames)
   colHeaders <- match.arg(colHeaders)
   
   tagList(
@@ -45,7 +45,7 @@ htable <- function(outputId, clickId = NULL, readOnly = FALSE,
     )),
     div(id=outputId, class="shiny-htable", 
         `data-htable-col-names`=colHeaders,
-        `data-htable-row-names`=rowHeaders,
+        `data-htable-row-names`=rowNames,
         `data-click-id`=clickId,
         `data-read-only`=readOnly,
         `data-min-rows`=minRows,
