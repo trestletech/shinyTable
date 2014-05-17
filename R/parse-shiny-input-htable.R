@@ -1,6 +1,5 @@
 # Parse incoming HTable input from the client
 .onLoad <- function(libname, pkgname){
-  print("onload")
   shiny::registerInputHandler("htable", function(val, shinysession, name){
     changes <- val$changes[[1]]
     cycle <- val$cycle

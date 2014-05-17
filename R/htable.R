@@ -10,10 +10,15 @@
 #'   if no cell is selected.
 #' @param readOnly If TRUE, client-side editing the table will be disabled. By 
 #'   default, will be FALSE to enable editing.
-#' @param headers Sets the way column headers should be displayed on the table.
+#' @param colHeaders Sets the way column headers should be displayed on the table.
 #'   \code{enabled} implies that the default column names (progression through
 #'   the alphabet) should be used. \code{disabled} implies that column headings
 #'   should be disabled completely. \code{provided} implies that the column
+#'   names should be extracted from the R object being displayed.
+#' @param rowHeaders Sets the way row headers should be displayed on the table.
+#'   \code{enabled} implies that the default row names (incrementing integers)
+#'   should be used. \code{disabled} implies that row names
+#'   should be disabled completely. \code{provided} implies that the row
 #'   names should be extracted from the R object being displayed.
 #' @param minRows The minimum number of rows to be included in the table.
 #' @param minCols The minimum number of columns to be included in the table.

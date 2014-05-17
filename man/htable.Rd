@@ -21,10 +21,16 @@ if no cell is selected.}
 \item{readOnly}{If TRUE, client-side editing the table will be disabled. By
 default, will be FALSE to enable editing.}
 
-\item{headers}{Sets the way column headers should be displayed on the table.
+\item{colHeaders}{Sets the way column headers should be displayed on the table.
 \code{enabled} implies that the default column names (progression through
 the alphabet) should be used. \code{disabled} implies that column headings
 should be disabled completely. \code{provided} implies that the column
+names should be extracted from the R object being displayed.}
+
+\item{rowHeaders}{Sets the way row headers should be displayed on the table.
+\code{enabled} implies that the default row names (incrementing integers)
+should be used. \code{disabled} implies that row names
+should be disabled completely. \code{provided} implies that the row
 names should be extracted from the R object being displayed.}
 
 \item{minRows}{The minimum number of rows to be included in the table.}
