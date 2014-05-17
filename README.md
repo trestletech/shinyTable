@@ -16,8 +16,7 @@ columns. We hope to fluidly incorporate data validation and other
 advanced features, as well.
 
 
-Installation
-------------
+## Installation
 
 You can install the latest version of the code using the `devtools` R package.
 
@@ -29,8 +28,17 @@ library(devtools)
 install_github("shinyTable", "trestletech")
 ```
 
-License
--------
+## Examples
+
+There are a few example provided in the `inst/examples` directory of this repository. You can run them using commands like:
+
+```r
+runApp(system.file("examples/01-simple", package="shinyTable"))
+```
+
+Other examples include `02-matrix` and `03-click-input`. See the directory for a complete list.
+
+## License
 
 The development of this project was generously sponsored by the [Institut de 
 Radioprotection et de Sûreté Nucléaire](http://www.irsn.fr/EN/Pages/home.aspx) 
