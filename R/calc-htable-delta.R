@@ -7,9 +7,13 @@
 #'   new matrix in the form of [row, col, newVal, oldVal].
 #' @author Jeff Allen \email{jeff@@trestletech.com}
 #' @export
-calcHtableDelta <- function (old, new, zeroIndex = TRUE){
+calcHtableDelta <- function (old, new, zeroIndex = TRUE, noChangeMissing = TRUE){
   changes <- matrix(ncol=4, nrow=0)
   colnames(changes) <- c("row", "col", "new", "old")
+  
+  # is there a better way to handle deletes?
+  if (noChangeMissing && (nrow(new) < nrow(old) || ncol(new) < ncol(old)))
+    return (changes)
   
   # Loop through each column, comparing the data
   for(i in 1:(max(ncol(new), ncol(old)))){

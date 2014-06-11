@@ -89,10 +89,8 @@ $.extend(shinyTableOutputBinding, {
       data: htable.data,
       colHeaders: htable.colnames,
       columnSorting: false,
-      columns: cols,
       minRows: $(el).data('min-rows'),
-      minCols: $(el).data('min-cols'),
-      contextMenu: processBooleanString($(el).data('contextmenu')) || false
+      minCols: $(el).data('min-cols')
     };
     
     if ($(el).data('width')){
@@ -101,6 +99,16 @@ $.extend(shinyTableOutputBinding, {
     
     if ($(el).data('height')){
       settings.height = $(el).data('height');  
+    }
+    
+    if (processBooleanString($(el).data('set-col-types'))){
+      settings.columns = cols;
+      if (processBooleanString($(el).data('context-menu'))){
+        settings.contextMenu = ['row_above', 'row_below', 'hsep2', 'remove_row', 
+                                'hsep3', 'undo', 'redo'];
+      }
+    } else if (processBooleanString($(el).data('context-menu'))){
+      settings.contextMenu = true;
     }
     
     var headersMode = $(el).data('htable-col-names');
@@ -207,13 +215,14 @@ function deregisterCallbacks(table, element){
 
 
 var changeCache = {}
-function cacheChange(elementId, change){
+function cacheChange(elementId, change, type){
   if (!changeCache[elementId]){
     changeCache[elementId] = [];
   }
   changeCache[elementId].push({
     cycle: getCycle(elementId, true),
-    change: change
+    change: change,
+    type: type
   });
 }
 /**
@@ -263,10 +272,13 @@ $.extend(shinyTableInputBinding, {
     return "htable";
   },
   getValue: function(el) {
-    if (changeRegistry[el.id]){
-      var changes = changeRegistry[el.id];
-      delete changeRegistry[el.id];
-      return {changes: changes, cycle: getCycle(el.id)};
+    //if (changeRegistry[el.id]){
+    //  var changes = changeRegistry[el.id];
+    //  delete changeRegistry[el.id];
+    //  return {changes: changes, cycle: getCycle(el.id)};
+    //}
+    if (changeCache[el.id]){
+      return {changes: changeCache[el.id], cycle: getCycle(el.id)};
     }
     return {cycle: getCycle(el.id)};
   },
@@ -294,7 +306,7 @@ $.extend(shinyTableInputBinding, {
         // so the server can properly update the input, but we don't need to
         // cache the change to support rollback.
         if (source !== 'rejected-change'){
-          cacheChange(el.id, changes);
+          cacheChange(el.id, changes, 'update');
         }
         
         callback(false);
@@ -302,16 +314,24 @@ $.extend(shinyTableInputBinding, {
     })
     
     registerCallback(tbl, el, "afterCreateRow", function(ind, ct){
-        Shiny.onInputChange(el.id, {action: 'createRow', ind: ind, ct: ct})
+      cacheChange(el.id, {index: ind, count: ct}, 'createRow');
+        
+      callback(false);
     })
     registerCallback(tbl, el, "afterRemoveRow", function(ind, ct){
-        Shiny.onInputChange(el.id, {action: 'removeRow', ind: ind, ct: ct})
+      cacheChange(el.id, {index: ind, count: ct}, 'removeRow');
+        
+      callback(false);
     })
     registerCallback(tbl, el, "afterCreateCol", function(ind, ct){
-        Shiny.onInputChange(el.id, {action: 'createCol', ind: ind, ct: ct})
+      cacheChange(el.id, {index: ind, count: ct}, 'createCol');
+        
+      callback(false);
     })
     registerCallback(tbl, el, "afterRemoveCol", function(ind, ct){
-        Shiny.onInputChange(el.id, {action: 'removeCol', ind: ind, ct: ct})
+      cacheChange(el.id, {index: ind, count: ct}, 'removeCol');
+        
+      callback(false);
     })
   },
   unsubscribe: function(el) {

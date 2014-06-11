@@ -16,15 +16,10 @@ applyTableChanges <- function(table, changes, trim=TRUE){
   if (is.null(changes)){
     return(table)
   }
-  if (length(changes) == 4 || length(changes[0] == 0)){
-    return (applyChange(table, changes, trim))
-  } else{
-    # This is a 2D array of changes to be applied.
-    for (i in 1:length(changes)){
-      table <- applyChange(table, changes[i], trim)
-    }
-    return (table)
+  for (i in 1:length(changes)){
+      table <- applyChange(table, changes$change[[1]], trim)
   }
+  return (table)
 }
 
 #' Apply a single change to the table.
@@ -50,7 +45,7 @@ applyChange <- function(table, change, trim=TRUE){
     new <- strtrim(new)
   }
   
-  if (as.character(table[row,col]) != as.character(old)){
+  if (as.character(table[row, col]) != as.character(old)){
     warning(paste("The old value for the cell in the change provided ('", 
                   table[row, col],
                   "') does not match the value provided by the client ('",
@@ -59,6 +54,36 @@ applyChange <- function(table, change, trim=TRUE){
   
   table[row, col] <- new
   return (table)
+}
+
+addRow = function(table, ind, ct) {
+  uptd <- rbind(table[seq(1, ind), ],
+                matrix(NA, ncol=ncol(table), nrow=ct))
+  if (nrow(table) > ind) 
+    uptd <- rbind(uptd, table[seq(ind + 1, nrow(table)), ])
+  
+  return (uptd)
+}
+
+delRow = function(table, ind, ct) {
+  uptd <- table[-seq(ind + 1, length=ct), ]
+  
+  return (uptd)
+}
+
+addCol = function(table, ind, ct) {
+  uptd <- cbind(table[, seq(1, ind)],
+               matrix(NA, nrow=nrow(table), ncol=ct))
+  if (ncol(table) > ind)
+    uptd <- cbind(uptd, table[, seq(ind + 1, ncol(table))])
+  
+  return (uptd)
+}
+
+delCol = function(table, ind, ct) {
+  uptd <- table[, -seq(ind + 1, length=ct)]
+  
+  return (uptd)
 }
 
 #' Trim trailing or leading whitespace from a string.

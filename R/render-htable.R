@@ -17,81 +17,55 @@ renderHtable <- function(expr, env = parent.frame(),
   function(shinysession, name, ...) {
     data <- func()
     
-    if (is.list(data) && !is.null(data$action)) {
-      orig <- .oldTables[[shinysession$token]][[name]]
+    # Identify columns that are factors
+    factorInd <- as.integer(which(sapply(data, class) == "factor"))
+    if (any(factorInd)){
+      warning ("Factors aren't currently supported. Will convert using as.character().")
       
-      if (data$action == "createRow") {
-        uptd <- rbind(orig[seq(1, data$ind), ],
-                      matrix(NA, ncol=ncol(orig), nrow=data$ct))
-        if (nrow(orig) > data$ind) 
-          uptd <- rbind(uptd, orig[seq(data$ind + 1, nrow(orig)), ])
-      } else if (data$action == "removeRow") {
-        uptd <- orig[-seq(data$ind + 1, length=data$ct), ]
-      } else if (data$action == "createCol") {
-        uptd <- cbind(orig[, seq(1, data$ind)],
-                      matrix(NA, nrow=nrow(orig), ncol=data$ct))
-        if (ncol(orig) > data$ind)
-          uptd <- cbind(uptd, orig[, seq(data$ind + 1, nrow(orig))])
-      } else if (data$action == "removeCol") {
-        uptd <- orig[, -seq(data$ind + 1, length=data$ct)]
+      # Doesn't work with multiple columns at once, so iterate.
+      #TODO: Optimize
+      for (col in factorInd){
+        data[,col] <- as.character(data[,col])
+      }
+    }
+    
+    if (is.null(shinysession$clientData[[paste("output_",name,"_init", sep="")]])){
+      # Must be initializing, send whole table.
+      
+      .oldTables[[shinysession$token]][[name]] <- data
+      
+      types <- getHtableTypes(data)
+      
+      return(list(
+        data = data,
+        types = types,
+        headers = colnames(data),
+        rownames = rownames(data),
+        cycle = .cycleCount[[shinysession$token]][[name]]
+      ))
+    } else{
+      # input stores the state captured currently on the client. Just send the 
+      # delta
+      if (is.null(.oldTables[[shinysession$token]][[name]])){
+        print("Null oldTbl")
+        return(NULL)
       }
       
-      if (data$action %in% c("createRow", "createCol"))
-        delta <- calcHtableDelta(.oldTables[[shinysession$token]][[name]], uptd)
-      else
+      if (is.null(data)){
+        print("Null Data")
+        return(NULL)
+      }
+    
+      delta <- calcHtableDelta(.oldTables[[shinysession$token]][[name]], data)
+        
+      # Avoid the awkward serialization of a row-less matrix in RJSONIO
+      if (nrow(delta) == 0){
         delta <- NULL
-      
-      .oldTables[[shinysession$token]][[name]] <- uptd
-    } else {
-      # Identify columns that are factors
-      factorInd <- as.integer(which(sapply(data, class) == "factor"))
-      if (any(factorInd)){
-        warning ("Factors aren't currently supported. Will convert using as.character().")
-        
-        # Doesn't work with multiple columns at once, so iterate.
-        #TODO: Optimize
-        for (col in factorInd){
-          data[,col] <- as.character(data[,col])
-        }
       }
       
-      if (is.null(shinysession$clientData[[paste("output_",name,"_init", sep="")]])){
-        # Must be initializing, send whole table.
-        
-        .oldTables[[shinysession$token]][[name]] <- data
-        
-        types <- getHtableTypes(data)
-        
-        return(list(
-          data = data,
-          types = types,
-          headers = colnames(data),
-          rownames = rownames(data),
-          cycle = .cycleCount[[shinysession$token]][[name]]
-        ))
-      } else{
-        # input stores the state captured currently on the client. Just send the 
-        # delta
-        if (is.null(.oldTables[[shinysession$token]][[name]])){
-          print("Null oldTbl")
-          return(NULL)
-        }
-        
-        if (is.null(data)){
-          print("Null Data")
-          return(NULL)
-        }
-
-        delta <- calcHtableDelta(.oldTables[[shinysession$token]][[name]], data)
-        
-        # Avoid the awkward serialization of a row-less matrix in RJSONIO
-        if (nrow(delta) == 0){
-          delta <- NULL
-        }
-        
-        .oldTables[[shinysession$token]][[name]] <- data
-      }
-    }  
+      .oldTables[[shinysession$token]][[name]] <- data
+    }
+ 
     #TODO: support updating of types, colnames, rownames, etc.
     
     shinysession$session$sendCustomMessage("htable-change", 
