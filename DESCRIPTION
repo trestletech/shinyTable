@@ -1,7 +1,7 @@
 Package: shinyTable
 Type: Package
 Title: Handsontable for Shiny
-Version: 0.1.0
+Version: 0.1.1
 Date: 2013-09-05
 Author: Trestle Technology, LLC.
 Maintainer: Jeff Allen <jeff@trestletech.com>
