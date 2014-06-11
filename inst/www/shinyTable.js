@@ -84,7 +84,6 @@ $.extend(shinyTableOutputBinding, {
       htable.data = buffer;
     }
     
-    var ctxtmenu = processBooleanString($(el).data('contextmenu')) || false;
     var settings = {
       readOnly: processBooleanString($(el).data('read-only')) || false,
       data: htable.data,
@@ -93,7 +92,7 @@ $.extend(shinyTableOutputBinding, {
       columns: cols,
       minRows: $(el).data('min-rows'),
       minCols: $(el).data('min-cols'),
-      contextMenu: processBooleanString($(el).data('contextmenu')) || false;
+      contextMenu: processBooleanString($(el).data('contextmenu')) || false
     };
     
     if ($(el).data('width')){
