@@ -67,7 +67,6 @@ $.extend(shinyTableOutputBinding, {
       }  
     }
     
-    
     //massage into handsontable-friendly format
     if (!(htable.data instanceof Array)){
       // object, needs to be parsed by row
@@ -85,6 +84,7 @@ $.extend(shinyTableOutputBinding, {
       htable.data = buffer;
     }
     
+    var ctxtmenu = processBooleanString($(el).data('contextmenu')) || false;
     var settings = {
       readOnly: processBooleanString($(el).data('read-only')) || false,
       data: htable.data,
@@ -92,7 +92,8 @@ $.extend(shinyTableOutputBinding, {
       columnSorting: false,
       columns: cols,
       minRows: $(el).data('min-rows'),
-      minCols: $(el).data('min-cols')
+      minCols: $(el).data('min-cols'),
+      contextMenu: processBooleanString($(el).data('contextmenu')) || false;
     };
     
     if ($(el).data('width')){
@@ -299,6 +300,19 @@ $.extend(shinyTableInputBinding, {
         
         callback(false);
       }
+    })
+    
+    registerCallback(tbl, el, "afterCreateRow", function(ind, ct){
+        Shiny.onInputChange(el.id, {action: 'createRow', ind: ind, ct: ct})
+    })
+    registerCallback(tbl, el, "afterRemoveRow", function(ind, ct){
+        Shiny.onInputChange(el.id, {action: 'removeRow', ind: ind, ct: ct})
+    })
+    registerCallback(tbl, el, "afterCreateCol", function(ind, ct){
+        Shiny.onInputChange(el.id, {action: 'createCol', ind: ind, ct: ct})
+    })
+    registerCallback(tbl, el, "afterRemoveCol", function(ind, ct){
+        Shiny.onInputChange(el.id, {action: 'removeCol', ind: ind, ct: ct})
     })
   },
   unsubscribe: function(el) {
