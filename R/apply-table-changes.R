@@ -45,7 +45,8 @@ applyChange <- function(table, change, trim=TRUE){
     new <- strtrim(new)
   }
   
-  if (as.character(table[row, col]) != as.character(old)){
+  if (!(is.null(old) && is.na(table[row, col])) ||
+        as.character(table[row, col]) != as.character(old)){
     warning(paste("The old value for the cell in the change provided ('", 
                   table[row, col],
                   "') does not match the value provided by the client ('",
