@@ -71,8 +71,9 @@ applyChange <- function(table, change, trim=TRUE){
 #' @param ct The number of rows to add
 #' @return The data.frame provided with the change applied.
 addRow = function(table, ind, ct) {
-  uptd <- rbind(table[seq(1, ind), ],
-                matrix(NA, ncol=ncol(table), nrow=ct))
+  new_rows <- matrix(NA, ncol=ncol(table), nrow=ct)
+  colnames(new_rows) <- colnames(table)
+  uptd <- rbind(table[seq(1, ind), ], new_rows)
   if (nrow(table) > ind)
     uptd <- rbind(uptd, table[seq(ind + 1, nrow(table)), ])
 
@@ -96,8 +97,9 @@ delRow = function(table, ind, ct) {
 #' @param ct The number of columns to add
 #' @return The data.frame provided with the change applied.
 addCol = function(table, ind, ct) {
-  uptd <- cbind(table[, seq(1, ind)],
-               matrix(NA, nrow=nrow(table), ncol=ct))
+  new_cols <- matrix(NA, nrow=nrow(table), ncol=ct)
+  colnames(new_cols) <- paste0("X", ind)
+  uptd <- cbind(table[, seq(1, ind)], new_cols)
   if (ncol(table) > ind)
     uptd <- cbind(uptd, table[, seq(ind + 1, ncol(table))])
 
