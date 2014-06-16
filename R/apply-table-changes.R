@@ -1,10 +1,10 @@
 #' Apply Changes to Htable
-#' 
+#'
 #' Apply the changes as passed from htable to a data.frame
 #' @param table The htable data.frame
-#' @param changes A single change (in an array of length 4) or a 2D array of 
-#'   multiple changes to apply, in the format used by 
-#'   Handsontable. Each array should be of the form 
+#' @param changes A single change (in an array of length 4) or a 2D array of
+#'   multiple changes to apply, in the format used by
+#'   Handsontable. Each array should be of the form
 #'   [row, col, oldValue, newValue] using 0-based-indexing to identify row and
 #'   col.
 #' @param trim if \code{TRUE}, will trim any leading or trailing whitespace from
@@ -39,51 +39,71 @@ applyChange <- function(table, change, trim=TRUE){
   col <- as.integer(change[2]) + 1
   old <- change[3]
   new <- change[4]
-  
+
   if (trim){
     old <- strtrim(old)
     new <- strtrim(new)
   }
-  
+
   if (!(is.null(old) && is.na(table[row, col])) ||
         as.character(table[row, col]) != as.character(old)){
-    warning(paste("The old value for the cell in the change provided ('", 
+    warning(paste("The old value for the cell in the change provided ('",
                   table[row, col],
                   "') does not match the value provided by the client ('",
                   old, "').", sep=""))
   }
-  
+
   table[row, col] <- new
   return (table)
 }
 
+#' Adds a row to a table.
+#' @param table The htable data.frame
+#' @param ind The 0 based index location to add the row
+#' @param ct The number of rows to add
+#' @return The data.frame provided with the change applied.
 addRow = function(table, ind, ct) {
   uptd <- rbind(table[seq(1, ind), ],
                 matrix(NA, ncol=ncol(table), nrow=ct))
-  if (nrow(table) > ind) 
+  if (nrow(table) > ind)
     uptd <- rbind(uptd, table[seq(ind + 1, nrow(table)), ])
-  
+
   return (uptd)
 }
 
+#' Deletes a row from a table.
+#' @param table The htable data.frame
+#' @param ind The 0 based index location to delete the row
+#' @param ct The number of rows to delete
+#' @return The data.frame provided with the change applied.
 delRow = function(table, ind, ct) {
   uptd <- table[-seq(ind + 1, length=ct), ]
-  
+
   return (uptd)
 }
 
+#' Adds a column to a table.
+#' @param table The htable data.frame
+#' @param ind The 0 based index location to add the column
+#' @param ct The number of columns to add
+#' @return The data.frame provided with the change applied.
 addCol = function(table, ind, ct) {
   uptd <- cbind(table[, seq(1, ind)],
                matrix(NA, nrow=nrow(table), ncol=ct))
   if (ncol(table) > ind)
     uptd <- cbind(uptd, table[, seq(ind + 1, ncol(table))])
-  
+
   return (uptd)
 }
 
+#' Deletes a column from a table.
+#' @param table The htable data.frame
+#' @param ind The 0 based index location to delete the column
+#' @param ct The number of columns to delete
+#' @return The data.frame provided with the change applied.
 delCol = function(table, ind, ct) {
   uptd <- table[, -seq(ind + 1, length=ct)]
-  
+
   return (uptd)
 }
 
