@@ -8,5 +8,4 @@ initResourcePaths <- function() {
     .global$loaded <- TRUE
   }
   includeCSS(system.file("bundled-css.css", package="shinyTable"))
-  
 }
