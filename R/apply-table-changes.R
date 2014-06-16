@@ -39,19 +39,27 @@ applyChange <- function(table, change, trim=TRUE){
   col <- as.integer(change[2]) + 1
   old <- change[3]
   new <- change[4]
-
+  
+  old_cls <- class(old[[1]])
   if (trim){
     old <- strtrim(old)
     new <- strtrim(new)
   }
 
   if (!(is.null(old) && is.na(table[row, col])) ||
-        as.character(table[row, col]) != as.character(old)){
+        as.character(table[row, col]) != as.character(old)) {
     warning(paste("The old value for the cell in the change provided ('",
                   table[row, col],
                   "') does not match the value provided by the client ('",
                   old, "').", sep=""))
   }
+  
+  if (old_cls != class(new[[1]]))
+    new <- tryCatch(match.fun(paste0("as.", old_cls))(new),
+                    error = function(e) {
+                      warning("Unable to match change to original ",
+                              "variabl class: ", geterrmessage())
+                      return(new) })
 
   table[row, col] <- new
   return (table)
