@@ -17,3 +17,7 @@
   background: #00F;
   color: #FFF;
 }
+.shiny-htable td.missing{
+  background: #00F;
+  color: #FFF;
+}
