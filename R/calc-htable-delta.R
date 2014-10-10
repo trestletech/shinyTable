@@ -32,7 +32,7 @@ calcHtableDelta <- function (old, new, zeroIndex = TRUE){
                                , ncol=4)
     } else {
       # They both have this column
-      deltaInd <- which(suppressWarnings(old[,i] != new[,i] | old[,i] == new[,i]))
+      deltaInd <- which(suppressWarnings(old[,i] != new[,i] || old[,i] == new[,i]))
       lng <- length(deltaInd)
       
       thisColChanges <- matrix(c(deltaInd, 
