@@ -30,7 +30,8 @@ renderHtable <- function(expr, env = parent.frame(),
       }
     }
     
-    if (is.null(shinysession$clientData[[paste("output_",name,"_init", sep="")]])){
+    if (TRUE) {
+      # is.null(shinysession$clientData[[paste("output_",name,"_init", sep="")]])){
       # Must be initializing, send whole table.
       
       .oldTables[[shinysession$token]][[name]] <- data
@@ -44,37 +45,37 @@ renderHtable <- function(expr, env = parent.frame(),
         rownames = rownames(data),
         cycle = .cycleCount[[shinysession$token]][[name]]
       ))
-    } else{
-      # input stores the state captured currently on the client. Just send the 
-      # delta
-      if (is.null(.oldTables[[shinysession$token]][[name]])){
-        print("Null oldTbl")
-        return(NULL)
-      }
+    } # else{
+    #   # input stores the state captured currently on the client. Just send the 
+    #   # delta
+    #   if (is.null(.oldTables[[shinysession$token]][[name]])){
+    #     print("Null oldTbl")
+    #     return(NULL)
+    #   }
       
-      if (is.null(data)){
-        print("Null Data")
-        return(NULL)
-      }
+    #   if (is.null(data)){
+    #     print("Null Data")
+    #     return(NULL)
+    #   }
       
-      delta <- calcHtableDelta(.oldTables[[shinysession$token]][[name]], data)
+    #   delta <- calcHtableDelta(.oldTables[[shinysession$token]][[name]], data)
             
-      # Avoid the awkward serialization of a row-less matrix in RJSONIO
-      if (nrow(delta) == 0){
-        delta <- NULL
-      }
+    #   # Avoid the awkward serialization of a row-less matrix in RJSONIO
+    #   if (nrow(delta) == 0){
+    #     delta <- NULL
+    #   }
       
-      .oldTables[[shinysession$token]][[name]] <- data
+    #   .oldTables[[shinysession$token]][[name]] <- data
       
-      #TODO: support updating of types, colnames, rownames, etc.
+    #   #TODO: support updating of types, colnames, rownames, etc.
       
-      shinysession$session$sendCustomMessage("htable-change", 
-                                             list(id=name, 
-                                                  changes=delta,
-                                                  cycle=.cycleCount[[shinysession$token]][[name]]))
+    #   shinysession$session$sendCustomMessage("htable-change", 
+    #                                          list(id=name, 
+    #                                               changes=delta,
+    #                                               cycle=.cycleCount[[shinysession$token]][[name]]))
       
-      # Don't return any data, changes have already been sent.
-      return(list(cycle=.cycleCount[[shinysession$token]][[name]]))
-    }
+    #   # Don't return any data, changes have already been sent.
+    #   return(list(cycle=.cycleCount[[shinysession$token]][[name]]))
+    # }
   }
 }
