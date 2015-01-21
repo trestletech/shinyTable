@@ -8,11 +8,10 @@
 #' @param env The environment in which \code{expr} should be evaluated.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
 #'   is useful if you want to save an expression in a variable.
-#' @importFrom shiny exprToFunction
 #' @author Jeff Allen \email{jeff@@trestletech.com}
 #' @export
-renderHtable <- function(expr, env = parent.frame(), 
-                        quoted = FALSE){
+renderHtable <- function(expr, env = parent.frame(),
+                         quoted = FALSE){
   func <- exprToFunction(expr, env, quoted)
   
   function(shinysession, name, ...) {
@@ -33,6 +32,10 @@ renderHtable <- function(expr, env = parent.frame(),
     if (is.null(shinysession$clientData[[paste("output_",name,"_init", sep="")]])){
       # Must be initializing, send whole table.
       
+      if (is.null(data)){
+        return(NULL)
+      }
+      
       .oldTables[[shinysession$token]][[name]] <- data
       
       types <- getHtableTypes(data)
@@ -44,8 +47,8 @@ renderHtable <- function(expr, env = parent.frame(),
         rownames = rownames(data),
         cycle = .cycleCount[[shinysession$token]][[name]]
       ))
-    } else{
-      # input stores the state captured currently on the client. Just send the 
+    } else {
+      # input stores the state captured currently on the client. Just send the
       # delta
       if (is.null(.oldTables[[shinysession$token]][[name]])){
         print("Null oldTbl")
@@ -57,21 +60,25 @@ renderHtable <- function(expr, env = parent.frame(),
         return(NULL)
       }
       
+      
       delta <- calcHtableDelta(.oldTables[[shinysession$token]][[name]], data)
-            
+      
       # Avoid the awkward serialization of a row-less matrix in RJSONIO
       if (nrow(delta) == 0){
         delta <- NULL
       }
       
-      .oldTables[[shinysession$token]][[name]] <- data
+      # attempt to convert input to origial classes
+      .oldTables[[shinysession$token]][[name]] <-
+        setHtableClass(data, .oldTables[[shinysession$token]][[name]])
       
       #TODO: support updating of types, colnames, rownames, etc.
       
-      shinysession$session$sendCustomMessage("htable-change", 
-                                             list(id=name, 
-                                                  changes=delta,
-                                                  cycle=.cycleCount[[shinysession$token]][[name]]))
+      shinysession$session$sendCustomMessage(
+        "htable-change",
+        list(id=name,
+             changes=delta,
+             cycle=.cycleCount[[shinysession$token]][[name]]))
       
       # Don't return any data, changes have already been sent.
       return(list(cycle=.cycleCount[[shinysession$token]][[name]]))
