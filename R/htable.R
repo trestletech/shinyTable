@@ -38,10 +38,10 @@ htable <- function(outputId, clickId = NULL, readOnly = FALSE,
     singleton(tags$head(
       initResourcePaths(),
       tags$script(src = 'shinyTable/shinyTable.js'),
-      tags$script(src = 'shinyTable/jquery.handsontable.full.js'),
+      tags$script(src = 'shinyTable/handsontable.full.v0.12.3.js'),
       tags$link(rel = 'stylesheet',
                 type = 'text/css',
-                href = 'shinyTable/jquery.handsontable.full.css')
+                href = 'shinyTable/handsontable.full.v0.12.3.css')      
     )),
     div(id=outputId, class="shiny-htable", 
         `data-htable-col-names`=colHeaders,
