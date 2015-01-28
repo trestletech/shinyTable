@@ -11,6 +11,17 @@ calcHtableDelta <- function (old, new, zeroIndex = TRUE){
   changes <- matrix(ncol=4, nrow=0)
   colnames(changes) <- c("row", "col", "new", "old")
   
+  if (is.vector(old)) {
+    if (ncol(new) > nrow(new))
+      old <- t(as.matrix(old))
+    else
+      old <- as.matrix(old)
+  }
+  
+  # handle adds/deletes
+  if (is.null(dim(new)) || any(dim(old) != dim(new)))
+    return (changes)
+  
   # Loop through each column, comparing the data
   for(i in 1:(max(ncol(new), ncol(old)))){
     
@@ -32,14 +43,18 @@ calcHtableDelta <- function (old, new, zeroIndex = TRUE){
                                , ncol=4)
     } else {
       # They both have this column
-      deltaInd <- which(suppressWarnings(old[,i] != new[,i]))
+      deltaInd <- which(!compareNA(old[,i], new[,i]))
       lng <- length(deltaInd)
       
+      if (nrow(old) < nrow(new))
+        val_old <- rep(NA, lng)
+      else
+        val_old <- old[deltaInd, i]
       thisColChanges <- matrix(c(deltaInd, 
                                  rep(i, lng), 
                                  new[deltaInd, i], 
-                                 old[deltaInd, i])
-                               , ncol=4)  
+                                 val_old), 
+                               ncol=4)  
     }
     
     if (zeroIndex && nrow(thisColChanges) > 0){
@@ -50,4 +65,22 @@ calcHtableDelta <- function (old, new, zeroIndex = TRUE){
     changes <- rbind(changes, thisColChanges)
   }
   return (changes)
+}
+
+#' This function returns TRUE wherever elements are the same, including NA's.
+#'  
+#' @param v1
+#' @param v2
+#' @return boolean
+#' @seealso http://www.cookbook-r.com/Manipulating_data/Comparing_vectors_or_factors_with_NA/
+compareNA <- function(v1, v2) {
+  mind <- min(length(v1), length(v2))
+  
+  same <- (v1[1:mind] == v2[1:mind])  |  (is.na(v1[1:mind]) & is.na(v2[1:mind]))
+  same[is.na(same)] <- FALSE
+  
+  mxind <- max(length(v1), length(v2))
+  if (mind != mxind)
+    same <- c(same, rep(FALSE, mxind - mind))
+  return(same)
 }
