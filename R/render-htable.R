@@ -1,5 +1,6 @@
 .oldTables <- new.env()
 .cycleCount <- new.env()
+.tblChanges <- new.env()
 
 #' Render a Handsontable Element
 #' 
@@ -16,7 +17,7 @@ renderHtable <- function(expr, env = parent.frame(),
   
   function(shinysession, name, ...) {
     data <- func()
-    
+
     # Identify columns that are factors
     factorInd <- as.integer(which(sapply(data, class) == "factor"))
     if (any(factorInd)){
@@ -48,9 +49,11 @@ renderHtable <- function(expr, env = parent.frame(),
         cycle = .cycleCount[[shinysession$token]][[name]]
       ))
     } else {
+      orig = .oldTables[[shinysession$token]][[name]]
+      
       # input stores the state captured currently on the client. Just send the
       # delta
-      if (is.null(.oldTables[[shinysession$token]][[name]])){
+      if (is.null(orig)){
         print("Null oldTbl")
         return(NULL)
       }
@@ -59,26 +62,62 @@ renderHtable <- function(expr, env = parent.frame(),
         print("Null Data")
         return(NULL)
       }
-      
-      
-      delta <- calcHtableDelta(.oldTables[[shinysession$token]][[name]], data)
-      
-      # Avoid the awkward serialization of a row-less matrix in RJSONIO
-      if (nrow(delta) == 0){
+
+      # check for cell updates
+      if (!is.na(Position(function(x) x$type %in% c("update"), 
+                            .tblChanges[[shinysession$token]][[name]]))) {
+        delta <- calcHtableDelta(orig, data)
+        
+        # Avoid the awkward serialization of a row-less matrix in RJSONIO
+        if (nrow(delta) == 0){
+          delta <- NULL
+        }
+      } else {
         delta <- NULL
       }
       
+      # check for column or row changes
+      cols = NULL
+      deltaCol = NULL
+      if (!is.na(Position(function(x) x$type %in% c("createCol", "removeCol"), 
+                            .tblChanges[[shinysession$token]][[name]]))) {
+        cols = colnames(data)
+
+        for(i in Position(function(x) x$type %in% c("createCol", "removeCol"), 
+                          .tblChanges[[shinysession$token]][[name]])) {
+          x = .tblChanges[[shinysession$token]][[name]][[i]]
+          deltaCol = c(deltaCol, ifelse(x$type == "createCol", 1, -1) * 
+                         seq(x$change$index, x$change$index + x$change$count - 1))
+        }
+      }
+      rws = NULL
+      deltaRow = NULL
+      if (!is.na(Position(function(x) x$type %in% c("createRow", "removeRow"), 
+                            .tblChanges[[shinysession$token]][[name]]))) {
+        rws = rownames(data)
+
+        for(i in Position(function(x) x$type %in% c("createRow", "removeRow"), 
+                          .tblChanges[[shinysession$token]][[name]])) {
+          x = .tblChanges[[shinysession$token]][[name]][[i]]
+          deltaRow = c(deltaRow, ifelse(x$type == "createRow", 1, -1) * 
+                         seq(x$change$index, x$change$index + x$change$count - 1))
+        }
+      }
+      
       # attempt to convert input to origial classes
-      .oldTables[[shinysession$token]][[name]] <-
-        setHtableClass(data, .oldTables[[shinysession$token]][[name]])
+      .oldTables[[shinysession$token]][[name]] <- setHtableClass(data, orig)
       
       #TODO: support updating of types, colnames, rownames, etc.
-      
+    
       shinysession$session$sendCustomMessage(
         "htable-change",
-        list(id=name,
-             changes=delta,
-             cycle=.cycleCount[[shinysession$token]][[name]]))
+        list(id = name,
+             changes = delta,
+             colchanges = deltaCol,
+             rowchanges = deltaRow,
+             headers = cols,
+             rownames = rws,
+             cycle = .cycleCount[[shinysession$token]][[name]]))
       
       # Don't return any data, changes have already been sent.
       return(list(cycle=.cycleCount[[shinysession$token]][[name]]))
