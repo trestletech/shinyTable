@@ -35,10 +35,15 @@ $.extend(shinyTableOutputBinding, {
       var rejected = flushChanges(el.id, htable.cycle);
       for (var i = 0; i < rejected.length; i++){
         console.log("Reverting rejected change");
-        var thisChange = rejected[i].change[0];
-        // safe to assume tbl exists.
-        tbl.setDataAtCell(thisChange[0], thisChange[1], 
-            thisChange[2], 'rejected-change');
+        
+        if (rejected[i].type == 'update'){
+          var thisChange = rejected[i].change[0];
+          // safe to assume tbl exists.
+          tbl.setDataAtCell(thisChange[0], thisChange[1], 
+              thisChange[2], 'rejected-change');
+        } else {
+          console.log("WARNING: reverting rejected row or change not yet supported");
+        }
       }    
       if (Object.size(htable) == 1){
         // has no other properties.
@@ -182,7 +187,7 @@ function processBooleanString(str){
  * externally. The changes will be stored here, indexed by the ID.
  */
  //TODO: Just use the changeCache, will support more than one event.
-var changeRegistry = {};
+//var changeRegistry = {};
 
 /**
  * Track the event callbacks bound to each htable so that we have the option
@@ -301,7 +306,7 @@ $.extend(shinyTableInputBinding, {
         if (changes[el.id]){
           console.log("WARNING: Overwriting a change before it was picked up by the server.");
         }
-        changeRegistry[el.id] = changes;
+        //changeRegistry[el.id] = changes;
         
         // If the change was rejected by the server, we do want to callback, 
         // so the server can properly update the input, but we don't need to
@@ -316,22 +321,22 @@ $.extend(shinyTableInputBinding, {
     
     registerCallback(tbl, el, "afterCreateRow", function(ind, ct){
       cacheChange(el.id, {index: ind, count: ct}, 'createRow');
-        
+      delete cellClasses[el.id];
       callback(false);
     })
     registerCallback(tbl, el, "afterRemoveRow", function(ind, ct){
       cacheChange(el.id, {index: ind, count: ct}, 'removeRow');
-        
+      delete cellClasses[el.id];
       callback(false);
     })
     registerCallback(tbl, el, "afterCreateCol", function(ind, ct){
       cacheChange(el.id, {index: ind, count: ct}, 'createCol');
-        
+      delete cellClasses[el.id];
       callback(false);
     })
     registerCallback(tbl, el, "afterRemoveCol", function(ind, ct){
       cacheChange(el.id, {index: ind, count: ct}, 'removeCol');
-        
+      delete cellClasses[el.id];
       callback(false);
     })
   },
@@ -345,23 +350,38 @@ Shiny.inputBindings.register(shinyTableInputBinding);
 
 Shiny.addCustomMessageHandler('htable-change', function(data) {
   var $el = $('#' + data.id);
-  if (!$el || !data.changes || !data.cycle)
+  if (!$el || !data.cycle)
     return;
-
-  // Flush any changes prior to the given cycle, as they've just been 
-  // acknowledged.
-  flushChanges(data.id, data.cycle);
   
   var tbl = $el.handsontable('getInstance');
-  for( var i = 0; i < data.changes.length; i++){
-    var change = data.changes[i];
-    tbl.setDataAtCell(
-      parseInt(change.row), 
-      parseInt(change.col),
-      change.new,
-      "server-update");
-  };
-  applyStyles(data.id);
+  
+  if (data.headers && tbl.getSettings().colHeaders)
+    tbl.updateSettings({ colHeaders: data.headers });
+  
+  if (data.rownames && tbl.getSettings().rowHeaders)
+    tbl.updateSettings({ rowHeaders: data.rownames });
+  
+  if (data.changes){
+    // Flush any changes prior to the given cycle, as they've just been 
+    // acknowledged.
+    flushChanges(data.id, data.cycle);
+    
+    for( var i = 0; i < data.changes.length; i++){
+      var change = data.changes[i];
+      tbl.setDataAtCell(
+        parseInt(change.row), 
+        parseInt(change.col),
+        change.new,
+        "server-update");
+    };
+    applyStyles(data.id);
+  } else if (data.rowchanges){
+    flushChanges(data.id, data.cycle);
+  } else if (data.colchanges){
+    flushChanges(data.id, data.cycle);
+  } else {
+    return;
+  } 
 });
 
 cellClasses = {};
@@ -412,8 +432,10 @@ function applyStyles(id){
       var td = tbl.getCell(row, col);
       
       // Clear out existing styles
-      while (td.classList.length > 0){
-        td.classList.remove(td.classList[0]);
+      if (td.classList){
+        while (td.classList.length > 0){
+          td.classList.remove(td.classList[0]);
+        }
       }
       td.classList.add(cellClasses[id][row][col]);
     });

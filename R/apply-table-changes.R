@@ -77,8 +77,9 @@ addRow = function(table, ind, ct) {
   } else {
     vect_in = FALSE
   }
-  
+ 
   new_rows = matrix(NA, ncol=ncol(table), nrow=ct)
+  rownames(new_rows) = ind + 1
   if (class(table) != "matrix")
     new_rows <- as.data.frame(new_rows)
   new_rows <- setHtableClass(new_rows, table)  
@@ -124,9 +125,9 @@ addCol = function(table, ind, ct) {
   } else {
     vect_in = FALSE
   }
-  
+
   new_cols <- matrix(NA, nrow=nrow(table), ncol=ct)
-  colnames(new_cols) <- paste0("X", ind)
+  colnames(new_cols) <- paste0("X", ind + 1)
   
   if (ind == 0) {
     uptd <- cbind(new_cols, table)
@@ -139,6 +140,9 @@ addCol = function(table, ind, ct) {
     else
       uptd <- cbind(cbind(table[, seq(1, ind)], new_cols), 
                     table[, seq(ind + 1, ncol(table))])
+    colnames(uptd) = c(colnames(table)[seq(1, ind)], colnames(new_cols),
+                       colnames(table)[seq(ind + 1, ncol(table))])
+                       
   }
     
   return (uptd)

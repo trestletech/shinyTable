@@ -8,7 +8,7 @@ htable(outputId, clickId = NULL, readOnly = FALSE,
   colHeaders = c("enabled", "disabled", "provided"),
   rowNames = c("disabled", "enabled", "provided"), minRows = 0,
   minCols = 0, width = 0, height = 0, contextMenu = FALSE,
-  setColTypes = !contextMenu)
+  setColTypes = FALSE)
 }
 \arguments{
 \item{outputId}{The ID of the \code{glOutput} associated with this element}
