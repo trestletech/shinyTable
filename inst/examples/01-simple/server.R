@@ -8,12 +8,15 @@ shinyServer(function(input, output, session) {
   
   validate <- function(tbl){
     updateTableStyle(session, "tbl", "valid", 
-                     which(as.numeric(tbl$num2) < 50), 2)
+                     which(as.numeric(tbl$num2) < 50), 
+                     which(names(tbl) == "num2"))
     updateTableStyle(session, "tbl", "warning", 
                      which(as.numeric(tbl$num2) >= 50 & 
-                             as.numeric(tbl$num2) < 100), 2)
+                             as.numeric(tbl$num2) < 100), 
+                     which(names(tbl) == "num2"))
     updateTableStyle(session, "tbl", "invalid", 
-                     which(as.numeric(tbl$num2) >= 100), 2)    
+                     which(as.numeric(tbl$num2) >= 100), 
+                     which(names(tbl) == "num2"))    
   }
   
   output$tbl <- renderHtable({
@@ -21,8 +24,9 @@ shinyServer(function(input, output, session) {
       rows <- 5
       # Seed the element with some data initially
       tbl <- data.frame(list(num1=1:rows, 
-                      num2=(1:rows)*20,
-                      letter=LETTERS[1:(rows)]))
+                             num2=(1:rows)*20,
+                             letter=LETTERS[1:(rows)]),
+                        stringsAsFactors = FALSE)
       rownames(tbl) <- LETTERS[2:(rows+1)]
       validate(tbl)
       
@@ -42,6 +46,7 @@ shinyServer(function(input, output, session) {
       
       tbl[as.integer(as.character(tbl[,1])) >= 100,1] <- 99
       cachedTbl <<- tbl
+      print(tbl)
       return(tbl)
     }
   })  
