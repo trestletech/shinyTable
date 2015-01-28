@@ -355,11 +355,15 @@ Shiny.addCustomMessageHandler('htable-change', function(data) {
   
   var tbl = $el.handsontable('getInstance');
   
-  if (data.headers && tbl.getSettings().colHeaders)
+  if (data.headers && tbl.getSettings().colHeaders){
     tbl.updateSettings({ colHeaders: data.headers });
+    applyStyles(data.id)
+  }
   
-  if (data.rownames && tbl.getSettings().rowHeaders)
+  if (data.rownames && tbl.getSettings().rowHeaders){
     tbl.updateSettings({ rowHeaders: data.rownames });
+    applyStyles(data.id)
+  }
   
   if (data.changes){
     // Flush any changes prior to the given cycle, as they've just been 
