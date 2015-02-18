@@ -30,8 +30,10 @@ renderHtable <- function(expr, env = parent.frame(),
       }
     }
     
-    if (is.null(shinysession$clientData[[paste("output_",name,"_init", sep="")]])){
-      # Must be initializing, send whole table.
+    if (is.null(shinysession$clientData[[
+      paste("output_", name, "_init", sep="")]]) || 
+      is.null(.tblChanges[[shinysession$token]][[name]])) {
+      # Must be initializing or server updated table, send whole table.
       
       if (is.null(data)){
         return(NULL)

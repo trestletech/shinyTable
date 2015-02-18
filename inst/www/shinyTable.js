@@ -373,7 +373,29 @@ Shiny.addCustomMessageHandler('htable-change', function(data) {
     applyStyles(data.id)
   }
   
-  if (data.changes){
+  if (data.data){
+    flushChanges(data.id, data.cycle);
+    
+    //massage into handsontable-friendly format
+    if (!(data.data instanceof Array)){
+      // object, needs to be parsed by row
+      var buffer = Array();
+      var row;
+      var keys = Object.keys(data.data);
+      for (var i = 0; i < data.data[Object.keys(data.data)[0]].length; i++){
+        row = Array();
+        for (var col = 0; col < Object.size(data.data); col++){
+          var key = keys[col];
+          row.push(data.data[key][i]);
+        }
+        buffer.push(row);
+      }
+      data.data = buffer;
+    }
+    
+    tbl.loadData(data.data);
+    applyStyles(data.id);
+  } else if (data.changes){
     // Flush any changes prior to the given cycle, as they've just been 
     // acknowledged.
     flushChanges(data.id, data.cycle);
