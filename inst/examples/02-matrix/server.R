@@ -12,6 +12,7 @@ shinyServer(function(input, output, session) {
       rows <- 5
       # Seed the element with some data initially
       tbl <- round(matrix(rnorm(rows^2), ncol=rows), 5)
+      colnames(tbl) = paste0("A", 1:5)
       
       # So RJSONIO clips numeric data after a few digits? 'Cause why would
       # anyone want more than a few digits of resolution anyways?
@@ -32,6 +33,7 @@ shinyServer(function(input, output, session) {
       rows <- 5
       # Seed the element with some data initially
       tbl <- data.frame(round(matrix(rnorm(rows^2), ncol=rows), 5))
+      colnames(tbl) = paste0("B", 1:5)
       
       # So RJSONIO clips numeric data after a few digits? 'Cause why would
       # anyone want more than a few digits of resolution anyways?
