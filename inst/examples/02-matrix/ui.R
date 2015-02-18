@@ -16,6 +16,6 @@ shinyUI(pageWithSidebar(
   mainPanel(
     htable("mat", contextMenu = TRUE),
     br(),
-    htable("df", contextMenu = TRUE)
+    htable("df", contextMenu = TRUE, colHeaders = "provided")
   )
 ))

@@ -303,6 +303,14 @@ $.extend(shinyTableInputBinding, {
       if (source !== "loadData" && source !== "server-update"){
         // Not a re-init from the server.
         
+        // Convert col/prop to int if string
+        var tbl = $(el).handsontable('getInstance');
+        for (c in changes) {
+          if (typeof(changes[c][1]) == "string") {
+            changes[c][1] = tbl.propToCol(changes[c][1]);
+          }          
+        }
+
         if (changes[el.id]){
           console.log("WARNING: Overwriting a change before it was picked up by the server.");
         }
