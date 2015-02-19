@@ -400,12 +400,11 @@ Shiny.addCustomMessageHandler('htable-change', function(data) {
     // acknowledged.
     flushChanges(data.id, data.cycle);
     
-    for( var i = 0; i < data.changes.length; i++){
-      var change = data.changes[i];
+    for( var i = 0; i < data.changes.row.length; i++){
       tbl.setDataAtCell(
-        parseInt(change.row), 
-        parseInt(change.col),
-        change.new,
+        parseInt(data.changes.row[i]), 
+        parseInt(data.changes.col[i]),
+        data.changes.new[i],
         "server-update");
     };
     applyStyles(data.id);

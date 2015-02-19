@@ -8,8 +8,7 @@
 #' @author Jeff Allen \email{jeff@@trestletech.com}
 #' @export
 calcHtableDelta <- function (old, new, zeroIndex = TRUE){
-  changes <- matrix(ncol=4, nrow=0)
-  colnames(changes) <- c("row", "col", "new", "old")
+  changes = NULL
   
   if (is.vector(old)) {
     if (ncol(new) > nrow(new))
@@ -29,18 +28,16 @@ calcHtableDelta <- function (old, new, zeroIndex = TRUE){
     
     if (i > ncol(new)){
       # the new data.frame doesn't have this column 
-      thisColChanges <- matrix(c(1:nrow(old), 
-                                 rep(i, nrow(old)), 
-                                 rep(NA, nrow(old)),
-                                 old[,i])
-                               , ncol=4)
+      thisColChanges <- data.frame(1:nrow(old), 
+                                   rep(i, nrow(old)), 
+                                   rep(NA, nrow(old)),
+                                   old[,i])
     } else if (i > ncol(old)){
       # The old data.frame doesn't have this column
-      thisColChanges <- matrix(c(1:nrow(new), 
-                                 rep(i, nrow(new)), 
-                                 new[,i], 
-                                 rep(NA, nrow(new)))
-                               , ncol=4)
+      thisColChanges <- data.frame(1:nrow(new), 
+                                   rep(i, nrow(new)), 
+                                   new[,i], 
+                                   rep(NA, nrow(new)))
     } else {
       # They both have this column
       deltaInd <- which(!compareNA(old[,i], new[,i]))
@@ -50,18 +47,23 @@ calcHtableDelta <- function (old, new, zeroIndex = TRUE){
         val_old <- rep(NA, lng)
       else
         val_old <- old[deltaInd, i]
-      thisColChanges <- matrix(c(deltaInd, 
-                                 rep(i, lng), 
-                                 new[deltaInd, i], 
-                                 val_old), 
-                               ncol=4)  
+      thisColChanges <- data.frame(deltaInd, 
+                                   rep(i, lng), 
+                                   new[deltaInd, i], 
+                                   val_old)  
     }
+    
+    if (is.logical(thisColChanges[, 3]))
+      thisColChanges[, 3] = ifelse(thisColChanges[, 3], "true", "false")
+    if (is.logical(thisColChanges[, 4]))
+      thisColChanges[, 4] = ifelse(thisColChanges[, 4], "true", "false")
     
     if (zeroIndex && nrow(thisColChanges) > 0){
       thisColChanges[,1] <- as.integer(thisColChanges[,1]) - 1;
       thisColChanges[,2] <- as.integer(thisColChanges[,2]) - 1;
     }
     
+    colnames(thisColChanges) <- c("row", "col", "new", "old")
     changes <- rbind(changes, thisColChanges)
   }
   return (changes)

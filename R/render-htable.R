@@ -69,11 +69,6 @@ renderHtable <- function(expr, env = parent.frame(),
       if (!is.na(Position(function(x) x$type %in% c("update"), 
                             .tblChanges[[shinysession$token]][[name]]))) {
         delta <- calcHtableDelta(orig, data)
-        
-        # Avoid the awkward serialization of a row-less matrix in RJSONIO
-        if (nrow(delta) == 0){
-          delta <- NULL
-        }
       } else {
         delta <- NULL
       }
