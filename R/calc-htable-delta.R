@@ -29,18 +29,16 @@ calcHtableDelta <- function (old, new, zeroIndex = TRUE){
     
     if (i > ncol(new)){
       # the new data.frame doesn't have this column 
-      thisColChanges <- matrix(c(1:nrow(old), 
-                                 rep(i, nrow(old)), 
-                                 rep(NA, nrow(old)),
-                                 old[,i])
-                               , ncol=4)
+      thisColChanges <- data.frame(1:nrow(old), 
+                                   rep(i, nrow(old)), 
+                                   rep(NA, nrow(old)),
+                                   old[,i])
     } else if (i > ncol(old)){
       # The old data.frame doesn't have this column
-      thisColChanges <- matrix(c(1:nrow(new), 
-                                 rep(i, nrow(new)), 
-                                 new[,i], 
-                                 rep(NA, nrow(new)))
-                               , ncol=4)
+      thisColChanges <- data.frame(1:nrow(new), 
+                                   rep(i, nrow(new)), 
+                                   new[,i], 
+                                   rep(NA, nrow(new)))
     } else {
       # They both have this column
       deltaInd <- which(!compareNA(old[,i], new[,i]))
@@ -50,11 +48,10 @@ calcHtableDelta <- function (old, new, zeroIndex = TRUE){
         val_old <- rep(NA, lng)
       else
         val_old <- old[deltaInd, i]
-      thisColChanges <- matrix(c(deltaInd, 
-                                 rep(i, lng), 
-                                 new[deltaInd, i], 
-                                 val_old), 
-                               ncol=4)  
+      thisColChanges <- data.frame(deltaInd, 
+                                   rep(i, lng), 
+                                   new[deltaInd, i], 
+                                   val_old)  
     }
     
     if (zeroIndex && nrow(thisColChanges) > 0){
