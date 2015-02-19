@@ -36,7 +36,7 @@ applyChange <- function(table, change, trim=TRUE){
   row <- as.integer(change[1]) + 1
   col <- as.integer(change[2]) + 1
   
-  old <- change[3]
+  old <- setHtableClass(change[3], table[row, col])[1, 1]
   if (length(change) == 4) {
     # cell update
     new <- change[4]
@@ -51,7 +51,7 @@ applyChange <- function(table, change, trim=TRUE){
     old <- strtrim(old)
     new <- strtrim(new)
   }
-  
+
   if (!is.na(table[row,col]) && 
         as.character(table[row,col]) != as.character(old)) {
     warning(paste("The old value for the cell in the change provided ('", 
