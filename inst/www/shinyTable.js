@@ -35,10 +35,15 @@ $.extend(shinyTableOutputBinding, {
       var rejected = flushChanges(el.id, htable.cycle);
       for (var i = 0; i < rejected.length; i++){
         console.log("Reverting rejected change");
-        var thisChange = rejected[i].change[0];
-        // safe to assume tbl exists.
-        tbl.setDataAtCell(thisChange[0], thisChange[1], 
-            thisChange[2], 'rejected-change');
+        
+        if (rejected[i].type == 'update'){
+          var thisChange = rejected[i].change[0];
+          // safe to assume tbl exists.
+          tbl.setDataAtCell(thisChange[0], thisChange[1], 
+              thisChange[2], 'rejected-change');
+        } else {
+          console.log("WARNING: reverting rejected row or change not yet supported");
+        }
       }    
       if (Object.size(htable) == 1){
         // has no other properties.
@@ -67,7 +72,6 @@ $.extend(shinyTableOutputBinding, {
       }  
     }
     
-    
     //massage into handsontable-friendly format
     if (!(htable.data instanceof Array)){
       // object, needs to be parsed by row
@@ -90,7 +94,6 @@ $.extend(shinyTableOutputBinding, {
       data: htable.data,
       colHeaders: htable.colnames,
       columnSorting: false,
-      columns: cols,
       minRows: $(el).data('min-rows'),
       minCols: $(el).data('min-cols')
     };
@@ -101,6 +104,15 @@ $.extend(shinyTableOutputBinding, {
     
     if ($(el).data('height')){
       settings.height = $(el).data('height');  
+    }
+    
+    if (processBooleanString($(el).data('set-col-types'))){
+      settings.columns = cols;
+      if (processBooleanString($(el).data('context-menu'))){
+        settings.contextMenu = ['row_above', 'row_below', '---------', 'remove_row'];
+      }
+    } else if (processBooleanString($(el).data('context-menu'))){
+      settings.contextMenu = ['row_above', 'row_below', '---------', 'col_left', 'col_right', '---------', 'remove_row', 'remove_col'];
     }
     
     var headersMode = $(el).data('htable-col-names');
@@ -175,7 +187,7 @@ function processBooleanString(str){
  * externally. The changes will be stored here, indexed by the ID.
  */
  //TODO: Just use the changeCache, will support more than one event.
-var changeRegistry = {};
+//var changeRegistry = {};
 
 /**
  * Track the event callbacks bound to each htable so that we have the option
@@ -207,13 +219,14 @@ function deregisterCallbacks(table, element){
 
 
 var changeCache = {}
-function cacheChange(elementId, change){
+function cacheChange(elementId, change, type){
   if (!changeCache[elementId]){
     changeCache[elementId] = [];
   }
   changeCache[elementId].push({
     cycle: getCycle(elementId, true),
-    change: change
+    change: change,
+    type: type
   });
 }
 /**
@@ -263,10 +276,15 @@ $.extend(shinyTableInputBinding, {
     return "htable";
   },
   getValue: function(el) {
+    /*
     if (changeRegistry[el.id]){
       var changes = changeRegistry[el.id];
       delete changeRegistry[el.id];
       return {changes: changes, cycle: getCycle(el.id)};
+    }
+    */
+    if (changeCache[el.id]){
+      return {changes: changeCache[el.id], cycle: getCycle(el.id)};
     }
     return {cycle: getCycle(el.id)};
   },
@@ -285,20 +303,49 @@ $.extend(shinyTableInputBinding, {
       if (source !== "loadData" && source !== "server-update"){
         // Not a re-init from the server.
         
+        // Convert col/prop to int if string
+        var tbl = $(el).handsontable('getInstance');
+        for (c in changes) {
+          if (typeof(changes[c][1]) == "string") {
+            changes[c][1] = tbl.propToCol(changes[c][1]);
+          }          
+        }
+
         if (changes[el.id]){
           console.log("WARNING: Overwriting a change before it was picked up by the server.");
         }
-        changeRegistry[el.id] = changes;
+        //changeRegistry[el.id] = changes;
         
         // If the change was rejected by the server, we do want to callback, 
         // so the server can properly update the input, but we don't need to
         // cache the change to support rollback.
         if (source !== 'rejected-change'){
-          cacheChange(el.id, changes);
+          cacheChange(el.id, changes, 'update');
         }
         
         callback(false);
       }
+    })
+    
+    registerCallback(tbl, el, "afterCreateRow", function(ind, ct){
+      cacheChange(el.id, {index: ind, count: ct}, 'createRow');
+      delete cellClasses[el.id];
+      callback(false);
+    })
+    registerCallback(tbl, el, "afterRemoveRow", function(ind, ct){
+      cacheChange(el.id, {index: ind, count: ct}, 'removeRow');
+      delete cellClasses[el.id];
+      callback(false);
+    })
+    registerCallback(tbl, el, "afterCreateCol", function(ind, ct){
+      cacheChange(el.id, {index: ind, count: ct}, 'createCol');
+      delete cellClasses[el.id];
+      callback(false);
+    })
+    registerCallback(tbl, el, "afterRemoveCol", function(ind, ct){
+      cacheChange(el.id, {index: ind, count: ct}, 'removeCol');
+      delete cellClasses[el.id];
+      callback(false);
     })
   },
   unsubscribe: function(el) {
@@ -311,23 +358,63 @@ Shiny.inputBindings.register(shinyTableInputBinding);
 
 Shiny.addCustomMessageHandler('htable-change', function(data) {
   var $el = $('#' + data.id);
-  if (!$el || !data.changes || !data.cycle)
+  if (!$el || !data.cycle)
     return;
-
-  // Flush any changes prior to the given cycle, as they've just been 
-  // acknowledged.
-  flushChanges(data.id, data.cycle);
   
   var tbl = $el.handsontable('getInstance');
-  for( var i = 0; i < data.changes.length; i++){
-    var change = data.changes[i];
-    tbl.setDataAtCell(
-      parseInt(change.row), 
-      parseInt(change.col),
-      change.new,
-      "server-update");
-  };
-  applyStyles(data.id);
+  
+  if (data.headers && tbl.getSettings().colHeaders){
+    tbl.updateSettings({ colHeaders: data.headers });
+    applyStyles(data.id)
+  }
+  
+  if (data.rownames && tbl.getSettings().rowHeaders){
+    tbl.updateSettings({ rowHeaders: data.rownames });
+    applyStyles(data.id)
+  }
+  
+  if (data.data){
+    flushChanges(data.id, data.cycle);
+    
+    //massage into handsontable-friendly format
+    if (!(data.data instanceof Array)){
+      // object, needs to be parsed by row
+      var buffer = Array();
+      var row;
+      var keys = Object.keys(data.data);
+      for (var i = 0; i < data.data[Object.keys(data.data)[0]].length; i++){
+        row = Array();
+        for (var col = 0; col < Object.size(data.data); col++){
+          var key = keys[col];
+          row.push(data.data[key][i]);
+        }
+        buffer.push(row);
+      }
+      data.data = buffer;
+    }
+    
+    tbl.loadData(data.data);
+    applyStyles(data.id);
+  } else if (data.changes){
+    // Flush any changes prior to the given cycle, as they've just been 
+    // acknowledged.
+    flushChanges(data.id, data.cycle);
+    
+    for( var i = 0; i < data.changes.row.length; i++){
+      tbl.setDataAtCell(
+        parseInt(data.changes.row[i]), 
+        parseInt(data.changes.col[i]),
+        data.changes.new[i],
+        "server-update");
+    };
+    applyStyles(data.id);
+  } else if (data.rowchanges){
+    flushChanges(data.id, data.cycle);
+  } else if (data.colchanges){
+    flushChanges(data.id, data.cycle);
+  } else {
+    return;
+  } 
 });
 
 cellClasses = {};
@@ -378,8 +465,10 @@ function applyStyles(id){
       var td = tbl.getCell(row, col);
       
       // Clear out existing styles
-      while (td.classList.length > 0){
-        td.classList.remove(td.classList[0]);
+      if (td.classList){
+        while (td.classList.length > 0){
+          td.classList.remove(td.classList[0]);
+        }
       }
       td.classList.add(cellClasses[id][row][col]);
     });
