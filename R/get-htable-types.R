@@ -44,7 +44,7 @@ toCls = function(x, cls) tryCatch(do.call(paste("as", cls, sep = "."), list(x)),
 #' @return data.frame
 #' @seealso https://stackoverflow.com/questions/9214819/supply-a-vector-to-classes-of-dataframe
 setHtableClass = function(data, old) {
-  if (class(old) == "matrix") {
+  if (class(old)[1] == "matrix") {
     toCls(data, class(old[1, 1]))
   } else {
     data = as.data.frame(data, stringsAsFactors = FALSE)
