@@ -1,6 +1,8 @@
 shinyTable
 ==========
 
+> WARNING: I don't have time to actively develop this project right now. I'll do my best to review pull requests and am open to taking on new collaborators/maintainers. Another alternative project to check out is https://github.com/jrowen/rhandsontable
+
 An R package that integrates Shiny with Handsontable. This package takes the 
 unique approach of intelligently calculating the data *that has changed* 
 on either the client or the server and sending only that data.
