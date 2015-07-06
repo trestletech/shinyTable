@@ -10,7 +10,7 @@ getHtableTypes <- function(data){
   } else if (is.data.frame(data)){
     types <- as.character(lapply(data, class))  
   } else{
-    stop("Unsupported object type. Can't extract column types.")
+    stop("Unsupported object type: ", class(data), " Can't extract column types.")
   }
   
   types <- sapply(types, function(type){
@@ -26,4 +26,37 @@ getHtableTypes <- function(data){
   })
   
   as.character(types)
+}
+
+#' Convert to specified class
+#' 
+#' @param x vector
+#' @param cls character
+#' @return converted vector
+#' @seealso https://stackoverflow.com/questions/9214819/supply-a-vector-to-classes-of-dataframe
+toCls = function(x, cls) tryCatch(do.call(paste("as", cls, sep = "."), list(x)),
+                                  warning = function(w) do.call(as.character, list(x)))
+
+#' Covert htable output matrix to data.frame using classes of model data.frame
+#' 
+#' @param data htable matrix
+#' @param old original data.frame
+#' @return data.frame
+#' @seealso https://stackoverflow.com/questions/9214819/supply-a-vector-to-classes-of-dataframe
+setHtableClass = function(data, old) {
+  if (class(old)[1] == "matrix") {
+    toCls(data, class(old[1, 1]))
+  } else {
+    data = as.data.frame(data, stringsAsFactors = FALSE)
+    
+    cls = sapply(old, class)
+    
+    # assume all cols are numeric, will be down coverted to character in toCls
+    # is there a better way to track which columns were added or removed?
+    if (length(cls) != ncol(data))
+      cls = rep("numeric", ncol(data))
+    
+    data = replace(data, values = Map(toCls, data, cls))
+  }
+  data
 }

@@ -24,16 +24,20 @@
 #' @param minCols The minimum number of columns to be included in the table.
 #' @param width The width of the table in pixels.
 #' @param height The height of the table in pixels.
+#' @param contextMenu If TRUE, right-click context menu is enabled.
+#' @param setColTypes If TRUE, column data types and formats are added. Adding 
+#'    types will prevent columns to be added/removed from the context menu.
 #' @author Jeff Allen \email{jeff@@trestletech.com}
 #' @export
 htable <- function(outputId, clickId = NULL, readOnly = FALSE,
                    colHeaders=c("enabled", "disabled", "provided"), 
                    rowNames=c("disabled", "enabled", "provided"), 
-                   minRows=0, minCols=0, width=0, height=0){
+                   minRows=0, minCols=0, width=0, height=0, 
+                   contextMenu = FALSE, setColTypes = FALSE){
   
   rowNames <- match.arg(rowNames)
   colHeaders <- match.arg(colHeaders)
-  
+
   tagList(
     singleton(tags$head(
       initResourcePaths(),
@@ -51,6 +55,8 @@ htable <- function(outputId, clickId = NULL, readOnly = FALSE,
         `data-min-rows`=minRows,
         `data-min-cols`=minCols,
         `data-width` = as.numeric(width),
-        `data-height` = as.numeric(height))
+        `data-height` = as.numeric(height),
+        `data-context-menu` = contextMenu,
+        `data-set-col-types` = setColTypes)
   )
 }
