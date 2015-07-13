@@ -42,7 +42,7 @@ applyChange <- function(table, change, trim=TRUE){
   # Extract and shift to 1-based-indexing
   row <- as.integer(change[1]) + 1
   col <- as.integer(change[2]) + 1
-  old <- change[3]
+  old <- setHtableClass(change[3], table[row, col])[1, 1]
   new <- change[4]
   
   if (trim){

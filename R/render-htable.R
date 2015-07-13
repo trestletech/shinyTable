@@ -58,11 +58,6 @@ renderHtable <- function(expr, env = parent.frame(),
       }
       
       delta <- calcHtableDelta(.oldTables[[shinysession$token]][[name]], data)
-            
-      # Avoid the awkward serialization of a row-less matrix in RJSONIO
-      if (nrow(delta) == 0){
-        delta <- NULL
-      }
       
       .oldTables[[shinysession$token]][[name]] <- data
       

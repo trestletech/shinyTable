@@ -320,10 +320,9 @@ Shiny.addCustomMessageHandler('htable-change', function(data) {
   
   var tbl = $el.handsontable('getInstance');
   for( var i = 0; i < data.changes.length; i++){
-    var change = data.changes[i];
     tbl.setDataAtCell(
-      parseInt(change.row), 
-      parseInt(change.col),
+      parseInt(data.changes.row[i]), 
+      parseInt(data.changes.col[i]),
       change.new,
       "server-update");
   };
