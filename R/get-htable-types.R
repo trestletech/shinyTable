@@ -28,21 +28,23 @@ getHtableTypes <- function(data){
   as.character(types)
 }
 
-#' Convert to specified class
-#' 
-#' @param x vector
-#' @param cls character
-#' @return converted vector
-#' @seealso https://stackoverflow.com/questions/9214819/supply-a-vector-to-classes-of-dataframe
+# Convert to specified class
+# 
+# @param x vector
+# @param cls character
+# @return converted vector
+# @seealso https://stackoverflow.com/questions/9214819/supply-a-vector-to-classes-of-dataframe
+# @author Jonathan Owen, jonathanro@@gmail.com
 toCls = function(x, cls) tryCatch(do.call(paste("as", cls, sep = "."), list(x)),
                                   warning = function(w) do.call(as.character, list(x)))
 
-#' Covert htable output matrix to data.frame using classes of model data.frame
-#' 
-#' @param data htable matrix
-#' @param old original data.frame
-#' @return data.frame
-#' @seealso https://stackoverflow.com/questions/9214819/supply-a-vector-to-classes-of-dataframe
+# Covert htable output matrix to data.frame using classes of model data.frame
+# 
+# @param data htable matrix
+# @param old original data.frame
+# @return data.frame
+# @seealso https://stackoverflow.com/questions/9214819/supply-a-vector-to-classes-of-dataframe
+# @author Jonathan Owen, jonathanro@@gmail.com
 setHtableClass = function(data, old) {
   if (class(old) == "matrix") {
     toCls(data, class(old[1, 1]))

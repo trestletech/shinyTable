@@ -5,7 +5,7 @@
 #' @param new The new data.frame
 #' @return A matrix in which each row represents a change from the old to the
 #'   new matrix in the form of [row, col, newVal, oldVal].
-#' @author Jeff Allen \email{jeff@@trestletech.com}
+#' @author Jeff Allen \email{jeff@@trestletech.com}, Jonathan Owen \email{jonathanro@@gmail.com}, Tadeas Palusga \email{tadeas@@palusga.cz}
 #' @export
 calcHtableDelta <- function (old, new, zeroIndex = TRUE){
   changes <- NULL
