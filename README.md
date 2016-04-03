@@ -27,7 +27,7 @@ You can install the latest version of the code using the `devtools` R package.
 install.packages("devtools")
 
 library(devtools)
-install_github("shinyTable", "trestletech")
+install_github("trestletech/shinyTable")
 ```
 
 ## Examples
