@@ -24,7 +24,7 @@ renderHtable <- function(expr, env = parent.frame(),
       warning ("Factors aren't currently supported. Will convert using as.character().")
       
       # Doesn't work with multiple columns at once, so iterate.
-      #TODO: Optimize
+      # TODO: Optimize
       for (col in factorInd){
         data[,col] <- as.character(data[,col])
       }
@@ -63,10 +63,10 @@ renderHtable <- function(expr, env = parent.frame(),
       
       #TODO: support updating of types, colnames, rownames, etc.
       
-      shinysession$session$sendCustomMessage("htable-change", 
-                                             list(id=name, 
-                                                  changes=delta,
-                                                  cycle=.cycleCount[[shinysession$token]][[name]]))
+      shinysession$sendCustomMessage("htable-change", 
+                                     list(id=name, 
+                                     changes=delta,
+                                     cycle=.cycleCount[[shinysession$token]][[name]]))
       
       # Don't return any data, changes have already been sent.
       return(list(cycle=.cycleCount[[shinysession$token]][[name]]))
