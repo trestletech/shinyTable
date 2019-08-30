@@ -29,10 +29,12 @@
 htable <- function(outputId, clickId = NULL, readOnly = FALSE,
                    colHeaders=c("enabled", "disabled", "provided"), 
                    rowNames=c("disabled", "enabled", "provided"), 
-                   minRows=0, minCols=0, width=0, height=0){
+                   minRows=0, minCols=0, width=0, height=0,
+                   readOnlyColumns = c(1,2,3)){
   
   rowNames <- match.arg(rowNames)
   colHeaders <- match.arg(colHeaders)
+  readOnlyColumns = jsonlite::toJSON(readOnlyColumns)
   
   tagList(
     singleton(tags$head(
@@ -48,6 +50,7 @@ htable <- function(outputId, clickId = NULL, readOnly = FALSE,
         `data-htable-row-names`=rowNames,
         `data-click-id`=clickId,
         `data-read-only`=readOnly,
+        `data-read-only-columns`=readOnlyColumns, # ADDED
         `data-min-rows`=minRows,
         `data-min-cols`=minCols,
         `data-width` = as.numeric(width),
